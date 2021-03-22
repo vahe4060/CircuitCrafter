@@ -10,14 +10,28 @@ CONFIG += c++11
 
 SOURCES += \
     edge.cpp \
+    graphicslineitem.cpp \
+    graphicspixmapitem.cpp \
+    graphicssceneitem.cpp \
+    input_node.cpp \
+    labels.cpp \
     main.cpp \
     mainwindow.cpp \
-    node.cpp
+    node.cpp \
+    operators.cpp \
+    output_node.cpp
 
 HEADERS += \
     edge.h \
+    graphicslineitem.h \
+    graphicspixmapitem.h \
+    graphicssceneitem.h \
+    input_node.h \
+    labels.h \
     mainwindow.h \
-    node.h
+    node.h \
+    operators.h \
+    output_node.h
 
 FORMS += \
     mainwindow.ui

@@ -1,97 +1,141 @@
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
-#include <iostream>
+
 
 QGraphicsScene* MainWindow::Scene = nullptr;
+QGraphicsItem* MainWindow::Center = new QGraphicsEllipseItem(0,0,1,1, nullptr);
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
     , m_graphicsView(new QGraphicsView)
-    , m_toolbox(new QToolBox)
-    , m_toolbar(new QToolBar)
-    , m_menubar(new QMenuBar)
-    //, m_scene(new QGraphicsScene)
 {
     this->resize(860,640);
-
     QWidget *widget = new QWidget;
 
-    MainWindow::Scene = new QGraphicsScene;
-    m_graphicsView->setScene(MainWindow::Scene);
-    //m_graphicsView->setCacheMode(QGraphicsView::CacheBackground);
-    //m_graphicsView->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
+    if(!MainWindow::Scene)
+        MainWindow::Scene = new QGraphicsScene;
+    MainWindow::Scene->addItem(MainWindow::Center);
 
-    //m_menubar = new QMenuBar;//(widget);
+
+    m_graphicsView->setScene(MainWindow::Scene);
+
     setToolBar();
     setToolBox();
     setMenuBar();
 
-    QHBoxLayout* hlayout = new QHBoxLayout;
-    hlayout->addWidget(m_toolbox,10);
-    hlayout->addWidget(m_graphicsView,90);
 
     QVBoxLayout* layout = new QVBoxLayout;
-    layout->addWidget(m_menubar);
-    layout->addWidget(m_toolbar);
-    layout->addItem(hlayout);
+    //layout->addWidget(m_toolbox,5);
+    //layout->addWidget(m_graphicsView,95);
+    layout->addWidget(m_graphicsView);
 
     widget->setLayout(layout);
     setCentralWidget(widget);
 
 
-    //GraphicsViewItem* item = new GraphicsViewItem(":/LogicOperators/OR.png");
-    //item->setScene(m_scene);
-    //m_scene->addItem(item);
 
-    //QGraphicsItem* item = new QGraphicsEllipseItem(QRectF(100,100,100,100));
-    //item->setFlag(QGraphicsItem::ItemIsSelectable, true);
-    //item->setFlag(QGraphicsItem::ItemIsMovable, true );
-    //m_scene->addItem(item);
+    //Label* l = new Label(SceneItem::INPUT,  140,80,  MainWindow::Center);
+    //Label* m = new Label(SceneItem::INPUT,  -40,80,  MainWindow::Center);
+    //Label* n = new Label(SceneItem::INPUT,  40,80,   MainWindow::Center);
+    //Label* o = new Label(SceneItem::OUTPUT, 190,100, MainWindow::Center);
+    //Label* p = new Label(SceneItem::OUTPUT, 190,100, MainWindow::Center);
     //
-    //QLabel* label = new QLabel("Push");
-    //m_scene->addWidget(label);
-    Node *a = new Node(0,0);
-    Node *b = new Node(50,0);
-
-    Edge *e = new Edge(b, a);
+    //
+    //Operator* a = new Operator(SceneItem::AND,  50,100, MainWindow::Center);
+    //Operator* b = new Operator(SceneItem::XNOR, 50,100, MainWindow::Center);
+    //Operator* c = new Operator(SceneItem::NOR,  50,100, MainWindow::Center);
+    //Operator* d = new Operator(SceneItem::NOT,  50,100, MainWindow::Center);
+    //Operator* e = new Operator(SceneItem::XOR,  50,100, MainWindow::Center);
+    //Operator* f = new Operator(SceneItem::NAND, 50,100, MainWindow::Center);
+    //Operator* g = new Operator(SceneItem::OR,   50,100, MainWindow::Center);
 
 }
+
 
 MainWindow::~MainWindow()
 {
-    delete ui;
-    //delete m_scene;
     delete m_graphicsView;
 }
 
+void MainWindow::addToScene(QString itemname)
+{
 
+}
 
 void MainWindow::setToolBar()
 {
-    m_toolbar->addWidget(new QPushButton("undo"));
-    m_toolbar->addWidget(new QPushButton("redo"));
-    m_toolbar->addWidget(new QPushButton("zoom in"));
-    m_toolbar->addWidget(new QPushButton("zoom out"));
+    m_toolbar_operators = addToolBar(tr("Operators"));
+    m_toolbar_tools = addToolBar(tr("Tools"));
+
+    QDir dir(":/Tools/images/");
+    for(uint i=0; i< dir.count(); i++)
+    {
+        QAction* action = m_toolbar_tools->addAction(QIcon(":/Tools/images/" +dir[i]), dir[i].split(".")[0]);
+        m_toolbar_tools->addSeparator();
+    }
+
+
+    QSignalMapper* signalMapper = new QSignalMapper(this);
+
+    dir.setPath(":/Operators/images/");
+    for(uint i=0; i< dir.count(); i++)
+    {
+        QString itemname = dir[i].split(".")[0];
+        QAction* action = m_toolbar_operators->addAction(QIcon(":/Operators/images/" +dir[i]), itemname);
+
+        signalMapper->setMapping(action, itemname);
+
+        connect(action, SIGNAL(triggered()),
+                signalMapper, SLOT (map()));
+    }
+
+    m_toolbar_operators->addSeparator();
+
+
+    dir.setPath(":/Labels/images/");
+    for(uint i=0; i< dir.count(); i++)
+    {
+        QString itemname = dir[i].split(".")[0];
+        QAction* action = m_toolbar_operators->addAction(QIcon(":/Labels/images/" +dir[i]), itemname);
+
+        signalMapper->setMapping(action, itemname);
+
+        connect(action, SIGNAL(triggered()),
+                signalMapper, SLOT (map()));
+    }
+
+
+    connect(signalMapper, SIGNAL(mapped(QString)),
+            this, SLOT(addToScene(QString)));
 }
 
 void MainWindow::setToolBox()
 {
-    m_toolbox->addItem(new QLabel("AND"), "Logic Operators");
-    m_toolbox->addItem(new QLabel, "Labels");
-    m_toolbox->addItem(new QLabel, "Triggers");
+
 }
 
 void MainWindow::setMenuBar()
 {
-    QMenu *file = new QMenu("&File");
-    file->addAction("Open");
-    file->addMenu("new");
 
-    QMenu *Build = new QMenu("&Build");
-    Build->addAction("Rebuild this file");
-    Build->addAction("Rebuild All");
+    QMenu* fileMenu = menuBar()->addMenu(tr("&File"));
+    fileMenu->addAction("Open");
+    fileMenu->addAction("New");
 
-    m_menubar->addMenu(file);
-    m_menubar->addMenu(Build);
+    QMenu* itemMenu = menuBar()->addMenu(tr("&Item"));
+    itemMenu->addAction("Rebuild this file");
+    itemMenu->addSeparator();
+    itemMenu->addAction("Rebuild all");
+
+    QMenu* aboutMenu = menuBar()->addMenu(tr("&Help"));
+    aboutMenu->addAction("About");
+
+    //QMenu *file = new QMenu("&File");
+    //file->addAction("Open");
+    //file->addMenu("new");
+    //
+    //QMenu *Build = new QMenu("&Build");
+    //Build->addAction("Rebuild this file");
+    //Build->addAction("Rebuild All");
+    //
+    //m_menubar->addMenu(file);
+    //m_menubar->addMenu(Build);
 }

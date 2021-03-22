@@ -1,5 +1,22 @@
 <RCC>
-    <qresource prefix="/LogicOperators">
-        <file>OR.png</file>
+    <qresource prefix="/Operators">
+        <file>images/NOT.png</file>
+        <file>images/AND.png</file>
+        <file>images/NAND.png</file>
+        <file>images/OR.png</file>
+        <file>images/NOR.png</file>
+        <file>images/XOR.png</file>
+        <file>images/XNOR.png</file>
+    </qresource>
+    <qresource prefix="/Tools">
+        <file>images/Mouse.png</file>
+        <file>images/ZoomIn.png</file>
+        <file>images/ZoomOut.png</file>
+        <file>images/Redo.png</file>
+        <file>images/Undo.png</file>
+    </qresource>
+    <qresource prefix="/Labels">
+        <file>images/IN.png</file>
+        <file>images/OUT.png</file>
     </qresource>
 </RCC>

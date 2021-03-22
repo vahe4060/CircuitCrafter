@@ -1,43 +1,98 @@
 #include "node.h"
 #include "mainwindow.h"
-#include <iostream>
 
-Node::Node(int xpos, int ypos):
-    QGraphicsEllipseItem(xpos, ypos, 10, 10)
-  , xpos(xpos)
-  , ypos(ypos)
+Node::Node(int xpos, int ypos, const int radius, QGraphicsItem* parent) : QGraphicsEllipseItem(0, 0, 2*radius, 2*radius, parent)
+    , xpos(xpos)
+    , ypos(ypos)
+    , radius(radius)
 {
-    setFlag(QGraphicsItem::ItemIsSelectable, true);
-    setFlag(QGraphicsItem::ItemIsMovable, true );
+    QGraphicsEllipseItem::setPos(QPointF(xpos, ypos));
+    setZValue(3);
+    setFlag(ItemIsMovable);
+    //MainWindow::Scene->addItem(this);
+    QGraphicsLineItem* line = new QGraphicsLineItem;
+}
 
-    MainWindow::Scene->addItem(this);
+void Node::adjust()
+{
+    for(QMap<Node*, Edge*>::iterator it = m_edges.begin(); it != m_edges.end(); ++it)
+        it.value()->adjust();
+}
 
+void Node::highlight(QPen& pen)
+{
+    for(auto*i: m_edges)
+    {
+        i->highlight(pen);
+    }
 }
 
 void Node::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-    xpos = pos().x();           // bug here
-    ypos = pos().y();           // bug here
+    //xpos = event->scenePos().x();
+    //ypos = event->scenePos().y();
+    //
+    //for(size_t i = 0; i < m_edges.size(); i++)
+    //{
+    //    m_edges[i]->adjust();
+    //}
+    //QGraphicsItem::mouseMoveEvent(event);
+    int cx = event->scenePos().x();
+    int cy = event->scenePos().y();
 
-    for(size_t i = 0; i < m_edges.size(); i++)
-    {
-        m_edges[i]->adjust();
-    }
-    QGraphicsItem::mouseMoveEvent(event);
-
+    line->setLine(x() + radius, y() + radius, cx, cy);
 }
 
-void Node::addEdge(Edge *e)
+void Node::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-    m_edges.push_back(e);
+    line = new QGraphicsLineItem;
+    MainWindow::Scene->addItem(line);
+
+    //qDebug() << "............";
+    //for(auto* i: MainWindow::Scene->items())
+    //{
+    //    qDebug() << i->type() << i;
+    //}
+    //qDebug() << "............";
+    //std::cout<<x()<<" "<<y()<<"\n";
 }
+
+void Node::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+{
+    MainWindow::Scene->removeItem(line);
+    delete line;
+
+    int cx = event->scenePos().x();
+    int cy = event->scenePos().y();
+
+    QGraphicsItem *it = MainWindow::Scene->itemAt(cx, cy, QTransform());
+    if(it && (it->type() == Node::input_node || it->type() == Node::output_node))
+    {
+        Node* target = static_cast<Node*>(it);
+        addEdge(target);
+    }
+
+    //qDebug() << "-------------------";
+    //for(auto* i: MainWindow::Scene->items())
+    //{
+    //    qDebug() << i->type() << i;
+    //}
+    //qDebug() << "-------------------";
+}
+
 
 int Node::x() const
 {
-    return xpos;
+    return scenePos().x(); //xpos;
 }
 
 int Node::y() const
 {
-    return ypos;
+    return scenePos().y(); //ypos;
 }
+
+int Node::r() const
+{
+    return radius;
+}
+
