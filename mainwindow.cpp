@@ -1,33 +1,38 @@
 #include "mainwindow.h"
 
-
-QGraphicsScene* MainWindow::Scene = nullptr;
-QGraphicsItem* MainWindow::Center = new QGraphicsEllipseItem(0,0,1,1, nullptr);
+QGraphicsView* MainWindow::View = nullptr;
+GraphicsScene* MainWindow::Scene = nullptr;
+QGraphicsItem* MainWindow::Center = nullptr;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
-    , m_graphicsView(new QGraphicsView)
 {
     this->resize(860,640);
     QWidget *widget = new QWidget;
+    QVBoxLayout* layout = new QVBoxLayout;
 
     if(!MainWindow::Scene)
-        MainWindow::Scene = new QGraphicsScene;
-    MainWindow::Scene->addItem(MainWindow::Center);
+    {
+        MainWindow::Scene = new GraphicsScene;
+        MainWindow::Scene->setSceneRect(QRectF(0, 0, 5000, 5000));
+    }
+    if(!MainWindow::Center)
+    {
+        MainWindow::Center = new QGraphicsEllipseItem(0,0,1,1, nullptr);
+        MainWindow::Scene->addItem(MainWindow::Center);
+    }
+    if(!MainWindow::View)
+        MainWindow::View = new QGraphicsView(MainWindow::Scene);
 
-
-    m_graphicsView->setScene(MainWindow::Scene);
 
     setToolBar();
-    setToolBox();
     setMenuBar();
 
 
-    QVBoxLayout* layout = new QVBoxLayout;
+
     //layout->addWidget(m_toolbox,5);
     //layout->addWidget(m_graphicsView,95);
-    layout->addWidget(m_graphicsView);
-
+    layout->addWidget(MainWindow::View);
     widget->setLayout(layout);
     setCentralWidget(widget);
 
@@ -53,13 +58,46 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-    delete m_graphicsView;
+    delete MainWindow::Center;
+    delete MainWindow::Scene;
+    delete MainWindow::View;
 }
+
 
 void MainWindow::addToScene(QString itemname)
 {
+    SceneItem::TYPE t;
+    if(itemname == "NOT")
+        t =SceneItem::TYPE::NOT;
+    else if(itemname == "AND")
+        t = SceneItem::TYPE::AND;
+    else if(itemname == "OR")
+        t = SceneItem::TYPE::OR;
+    else if(itemname == "XOR")
+        t = SceneItem::TYPE::XOR;
+    else if(itemname == "NAND")
+        t = SceneItem::TYPE::NAND;
+    else if(itemname == "NOR")
+        t = SceneItem::TYPE::NOR;
+    else if(itemname == "XNOR")
+        t = SceneItem::TYPE::XNOR;
+    else if(itemname == "IN")
+        t = SceneItem::TYPE::INPUT;
+    else if(itemname == "OUT")
+        t = SceneItem::TYPE::OUTPUT;
+    else if(itemname == "NOT")
+        t = SceneItem::TYPE::NOT;
+    else
+        return;
 
+    MainWindow::Scene->setCurrent(t);
+
+    if(t == SceneItem::INPUT || t == SceneItem::OUTPUT)
+        MainWindow::View->setCursor(QCursor(QPixmap(":/Labels/images/" + SceneItem::types[t] + ".png"), 0,0));
+    else
+        MainWindow::View->setCursor(QCursor(QPixmap(":/Operators/images/" + SceneItem::types[t] + ".png"), 0,0));
 }
+
 
 void MainWindow::setToolBar()
 {
@@ -108,10 +146,7 @@ void MainWindow::setToolBar()
             this, SLOT(addToScene(QString)));
 }
 
-void MainWindow::setToolBox()
-{
 
-}
 
 void MainWindow::setMenuBar()
 {

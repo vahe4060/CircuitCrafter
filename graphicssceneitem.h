@@ -19,6 +19,7 @@ public:
         NOR,
         XNOR
     };
+    static QMap<TYPE, QString> types;
 
     explicit SceneItem(TYPE t, int x, int y, QGraphicsItem* parent=nullptr);
     virtual ~SceneItem();
@@ -34,7 +35,7 @@ protected:
     GraphicsPixmapItem* m_pixmap = nullptr;
     TYPE m_t;
 
-    static QMap<TYPE, QString> types;
+    //static QMap<TYPE, QString> types;
 };
 
 #endif // LOGIC_OPERATOR_H

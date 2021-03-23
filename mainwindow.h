@@ -11,6 +11,8 @@
 #include "labels.h"
 #include "operators.h"
 #include "graphicslineitem.h"
+#include "graphicsscene.h"
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -26,19 +28,18 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    static QGraphicsScene* Scene;
+    static QGraphicsView* View;
+    static GraphicsScene* Scene;
     static QGraphicsItem* Center;
 
 
 protected:
     //Ui::MainWindow *ui;
-    QGraphicsView* m_graphicsView = nullptr;
+    //QGraphicsView* m_graphicsView = nullptr;
     QToolBar* m_toolbar_operators = nullptr;
     QToolBar* m_toolbar_tools = nullptr;
-    QString m_current;
 
     void setToolBar();
-    void setToolBox();
     void setMenuBar();
 };
 

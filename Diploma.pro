@@ -12,6 +12,7 @@ SOURCES += \
     edge.cpp \
     graphicslineitem.cpp \
     graphicspixmapitem.cpp \
+    graphicsscene.cpp \
     graphicssceneitem.cpp \
     input_node.cpp \
     labels.cpp \
@@ -25,6 +26,7 @@ HEADERS += \
     edge.h \
     graphicslineitem.h \
     graphicspixmapitem.h \
+    graphicsscene.h \
     graphicssceneitem.h \
     input_node.h \
     labels.h \
