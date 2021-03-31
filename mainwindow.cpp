@@ -359,8 +359,8 @@ void MainWindow::load()
 
         SceneItem::TYPE t = static_cast<SceneItem::TYPE>(it["type"].toInt());
         int id = it["id"].toInt();
-        int x = it["pos"].toObject()["x"].toInt();
-        int y = it["pos"].toObject()["y"].toInt();
+        int x = it["pos"].toObject()["x"].toDouble();
+        int y = it["pos"].toObject()["y"].toDouble();
 
         if(t == SceneItem::TYPE::INPUT || t == SceneItem::TYPE::OUTPUT)
         {
@@ -376,10 +376,10 @@ void MainWindow::load()
     for(QJsonValueRef i: edges)
     {
         QJsonObject it = i.toObject();
-        int x1 = it["left"].toObject()["x"].toInt();
-        int y1 = it["left"].toObject()["y"].toInt();
-        int x2 = it["right"].toObject()["x"].toInt();
-        int y2 = it["right"].toObject()["y"].toInt();
+        int x1 = it["left"].toObject()["x"].toDouble();
+        int y1 = it["left"].toObject()["y"].toDouble();
+        int x2 = it["right"].toObject()["x"].toDouble();
+        int y2 = it["right"].toObject()["y"].toDouble();
 
         Node* left =  static_cast<Node*>(m_Scene->itemAt(QPointF(x1,y1), QTransform()));
         Node* right = static_cast<Node*>(m_Scene->itemAt(QPointF(x2,y2), QTransform()));
@@ -409,10 +409,10 @@ void MainWindow::setShowAxes()
 
 void MainWindow::about()
 {
-    QMessageBox::question(this, "about", "\tQt version:           5_15_0"
+    QMessageBox::question(this, "about", "\tQt version:           5.15.0"
                                          "\n"
                                          "\n"
-                                         "\tQt Creator version:   4_8",
+                                         "\tQt Creator version:   4.12.4",
                           QMessageBox::Ok);
 }
 
