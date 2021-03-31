@@ -1,6 +1,6 @@
 #include "graphicspixmapitem.h"
 #include "graphicssceneitem.h"
-
+#include "mainwindow.h"
 
 GraphicsPixmapItem::GraphicsPixmapItem(const QPixmap &pixmap, QGraphicsItem *parent) :
     QGraphicsPixmapItem(pixmap, parent)
@@ -23,7 +23,7 @@ QVariant GraphicsPixmapItem::itemChange(GraphicsItemChange change, const QVarian
         else
         {
             // do stuff if not selected
-            QPen pen(QBrush(Qt::black), 2);
+            QPen pen(QBrush(Qt::GlobalColor(MainWindow::WireColor())), 2);
             static_cast<SceneItem*>(parentItem())->highlight(pen);
         }
     }

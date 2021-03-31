@@ -22,25 +22,65 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 public slots:
-    void addToScene(QString itemtype);
+    void setDrawingObject(QString itemtype);
+    void stopDrawingObject();
+    void zoom(int zoomin = 0);
+    void save();
+    void load();
+    void eraser();
+    void eraseAll();
+    void loadAxes();
+    void resetSettings();
+    void setAutoSave();
+    void setShowAxes();
+    void newDocument();
+    void setUpdatedFlag();
+    void setNotUpdatedFlag();
+    void about();
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+   // MainWindow(QWidget *parent = nullptr);
+   // ~MainWindow();
+
+    static MainWindow* instance();
     ~MainWindow();
 
-    static QGraphicsView* View;
-    static GraphicsScene* Scene;
-    static QGraphicsItem* Center;
+    MainWindow& operator=(const MainWindow&) = delete;
+    MainWindow(const MainWindow&) = delete;
 
+    int NextID() { return ++m_objectCount; }
+    QGraphicsView* View() const { return m_View; }
+    QGraphicsScene* Scene() const { return m_Scene; }
+    QGraphicsItem* Center() const { return m_Center; }
+    static Qt::GlobalColor WireColor();
 
 protected:
-    //Ui::MainWindow *ui;
-    //QGraphicsView* m_graphicsView = nullptr;
+    static MainWindow* m_instance;
+    static bool autoSave;
+    static bool showAxes;
+    static Qt::GlobalColor wireColor;
+
+    int m_objectCount = 0;
+    QGraphicsView* m_View = nullptr;
+    GraphicsScene* m_Scene = nullptr;
+    QGraphicsItem* m_Center = nullptr;
+
     QToolBar* m_toolbar_operators = nullptr;
     QToolBar* m_toolbar_tools = nullptr;
 
+    QAction* autoSaveAction = nullptr;
+    QAction* showAxesAction = nullptr;
+
+    QString currentPath = "";
+    bool updated = false;
+
+    virtual void closeEvent(QCloseEvent* event) override;
+    MainWindow(QWidget *parent = nullptr);
     void setToolBar();
     void setMenuBar();
+    void loadSettings();
+
+
 };
 
 #endif // MAINWINDOW_H

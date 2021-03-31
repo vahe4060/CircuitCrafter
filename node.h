@@ -14,8 +14,8 @@ public:
     Node(int xpos, int ypos, const int radius=10, QGraphicsItem* parent=nullptr);
     //virtual ~Node() = 0;
 
-    enum { input_node = UserType + 10,
-           output_node };
+    enum { IN_NODE = UserType + 10,
+           OUT_NODE  };
 
     int x() const;
     int y() const;

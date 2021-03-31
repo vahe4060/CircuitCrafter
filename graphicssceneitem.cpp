@@ -1,5 +1,5 @@
 #include "graphicssceneitem.h"
-
+#include "mainwindow.h"
 
 QMap<SceneItem::TYPE, QString> SceneItem::types = {
     {SceneItem::TYPE::NOT,    "NOT"},
@@ -16,12 +16,25 @@ QMap<SceneItem::TYPE, QString> SceneItem::types = {
 
 SceneItem::SceneItem(TYPE t, int x, int y, QGraphicsItem* parent) : QGraphicsItemGroup(parent)
    , m_t(t)
+   , m_id(MainWindow::instance()->NextID())
 {
     QGraphicsItemGroup::setPos(x,y);
     setHandlesChildEvents(false);
 
+    MainWindow::instance()->setUpdatedFlag();
     //m_pixmap = new GraphicsPixmapItem(QPixmap(":/LogicOperators/images/" + SceneItem::types[t] + ".png"), this);
 }
+
+SceneItem::SceneItem(const int id, TYPE t, int x, int y, QGraphicsItem* parent) : QGraphicsItemGroup(parent)
+   , m_t(t)
+   , m_id(id)
+{
+    QGraphicsItemGroup::setPos(x,y);
+    setHandlesChildEvents(false);
+
+    MainWindow::instance()->setUpdatedFlag();
+}
+
 
 SceneItem::~SceneItem()
 {
@@ -61,6 +74,8 @@ void SceneItem::setPos(QPointF pos)
     {
         i->adjust();
     }
+
+    MainWindow::instance()->setUpdatedFlag();
 }
 
 

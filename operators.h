@@ -7,6 +7,7 @@ class Operator: public SceneItem
 public:
 
     Operator(TYPE t, int x, int y, QGraphicsItem* parent=nullptr);
+    Operator(const int id, TYPE t, int x, int y, QGraphicsItem* parent=nullptr);
 
     virtual void execute();
 protected:

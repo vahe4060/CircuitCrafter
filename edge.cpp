@@ -1,8 +1,7 @@
 #include "edge.h"
 #include "mainwindow.h"
 
-
-Edge::Edge(Node *left, Node *right) : QGraphicsItemGroup(MainWindow::Center)
+Edge::Edge(Node *left, Node *right) : QGraphicsItemGroup(MainWindow::instance()->Center())
   , m_left(left)
   , m_right(right)
 {
@@ -13,7 +12,8 @@ Edge::Edge(Node *left, Node *right) : QGraphicsItemGroup(MainWindow::Center)
         m_right = left;
     }
 
-    //MainWindow::Scene->addItem(this);
+
+    //MainWindow::instance()->Scene()->addItem(this);
     h_line1 = new GraphicsLineItem(GraphicsLineItem::HORIZONAL_LOWER, this);
     h_line2 = new GraphicsLineItem(GraphicsLineItem::HORIZONAL_UPPER, this);
     v_line  = new GraphicsLineItem(GraphicsLineItem::VERTICAL_LEFT, this);
@@ -25,20 +25,24 @@ Edge::Edge(Node *left, Node *right) : QGraphicsItemGroup(MainWindow::Center)
     adjust();
     setZValue(1);
     setHandlesChildEvents(false);
+
+    MainWindow::instance()->setUpdatedFlag();
 }
 
 Edge::~Edge()
 {
     m_left->removeEdge(m_right);
 
-    MainWindow::Scene->removeItem(h_line1);
-    MainWindow::Scene->removeItem(h_line2);
-    MainWindow::Scene->removeItem(v_line);
+    MainWindow::instance()->Scene()->removeItem(h_line1);
+    MainWindow::instance()->Scene()->removeItem(h_line2);
+    MainWindow::instance()->Scene()->removeItem(v_line);
 
     //or  m_right->removeEdge(m_left);
     delete h_line1;
     delete h_line2;
     delete v_line;
+
+    MainWindow::instance()->setUpdatedFlag();
 }
 
 
@@ -70,7 +74,7 @@ void Edge::adjust()
     {
         bool AreaIsBusy = false;
 
-        QList<QGraphicsItem*> items = MainWindow::Scene->items(QRectF(QPointF(x,ly), QPointF(x+5,ry)));
+        QList<QGraphicsItem*> items = MainWindow::instance()->Scene()->items(QRectF(QPointF(x,ly), QPointF(x+5,ry)));
         for(int i =0; i < items.size(); i++)
         {
             if(items[i]->type() == GraphicsLineItem::VERTICAL_LEFT) // || items[i]->type() == GraphicsLineItem::VERTICAL_RIGHT
@@ -81,11 +85,14 @@ void Edge::adjust()
                     break;
                 }
             }
-            else if(items[i]->type() == Node::input_node || items[i]->type() == Node::output_node)
+            else if(items[i]->type() == Node::IN_NODE
+                    || items[i]->type() == Node::OUT_NODE
+                    || items[i]->type() == GraphicsPixmapItem::Type)
             {
                 AreaIsBusy = true;
                 break;
             }
+
         }
 
         if(!AreaIsBusy)
@@ -149,7 +156,7 @@ void Edge::adjust()
             qDebug() << "something wrong in Edge::adjust";
         }
     }
-
+    MainWindow::instance()->setUpdatedFlag();
 }
 
 

@@ -1,19 +1,20 @@
 #include "graphicslineitem.h"
 #include "edge.h"
+#include "mainwindow.h"
 
 GraphicsLineItem::GraphicsLineItem(TYPE t, QGraphicsItem *parent) : QGraphicsLineItem(parent)
   , m_t(t)
 {
     setFlag(QGraphicsItem::ItemIsSelectable);
     setFlag(QGraphicsItem::ItemIsFocusable);
-    setPen(QPen(QBrush(Qt::black),  2));
+    setPen(QPen(QBrush(MainWindow::WireColor()),  2));
 }
 GraphicsLineItem::GraphicsLineItem(TYPE t, const QLineF &line, QGraphicsItem *parent) : QGraphicsLineItem(parent)
   , m_t(t)
 {
     setFlag(QGraphicsItem::ItemIsSelectable);
     setFlag(QGraphicsItem::ItemIsFocusable);
-    setPen(QPen(QBrush(Qt::black),  2));
+    setPen(QPen(QBrush(MainWindow::WireColor()),  2));
     setLine(line);
 }
 
@@ -97,7 +98,7 @@ QVariant GraphicsLineItem::itemChange(GraphicsItemChange change, const QVariant 
         else
         {
             // do stuff if not selected
-            QPen pen(QBrush(Qt::black), 2);
+            QPen pen(QBrush(MainWindow::WireColor()), 2);
             static_cast<Edge*>(parentItem())->highlight(pen);
         }
     }

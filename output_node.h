@@ -10,7 +10,7 @@ public:
     Output_Node(int xpos, int ypos, const int radius=10, QGraphicsItem* parent=nullptr);
     ~Output_Node();
 
-    virtual int type() const override { return Node::output_node; }
+    virtual int type() const override { return Node::OUT_NODE; }
     virtual void addEdge(Node* e) override;
     virtual void removeEdge(Node* e) override;
     virtual bool areConnected(Node* other) override;

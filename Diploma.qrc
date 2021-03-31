@@ -14,9 +14,15 @@
         <file>images/ZoomOut.png</file>
         <file>images/Redo.png</file>
         <file>images/Undo.png</file>
+        <file>images/ZoomReset.png</file>
+        <file>images/Eraser.png</file>
+        <file>images/EraseAll.png</file>
     </qresource>
     <qresource prefix="/Labels">
         <file>images/IN.png</file>
         <file>images/OUT.png</file>
+    </qresource>
+    <qresource prefix="/params">
+        <file>settings.json</file>
     </qresource>
 </RCC>

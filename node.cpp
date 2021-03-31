@@ -8,8 +8,8 @@ Node::Node(int xpos, int ypos, const int radius, QGraphicsItem* parent) : QGraph
 {
     QGraphicsEllipseItem::setPos(QPointF(xpos, ypos));
     setZValue(3);
-    setFlag(ItemIsMovable);
-    //MainWindow::Scene->addItem(this);
+    //setFlag(ItemIsMovable);
+    //MainWindow::instance()->Scene()->addItem(this);
     QGraphicsLineItem* line = new QGraphicsLineItem;
 }
 
@@ -46,10 +46,10 @@ void Node::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 void Node::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     line = new QGraphicsLineItem;
-    MainWindow::Scene->addItem(line);
+    MainWindow::instance()->Scene()->addItem(line);
 
     //qDebug() << "............";
-    //for(auto* i: MainWindow::Scene->items())
+    //for(auto* i: MainWindow::instance()->Scene()->items())
     //{
     //    qDebug() << i->type() << i;
     //}
@@ -59,21 +59,21 @@ void Node::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
 void Node::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
-    MainWindow::Scene->removeItem(line);
+    MainWindow::instance()->Scene()->removeItem(line);
     delete line;
 
     int cx = event->scenePos().x();
     int cy = event->scenePos().y();
 
-    QGraphicsItem *it = MainWindow::Scene->itemAt(cx, cy, QTransform());
-    if(it && (it->type() == Node::input_node || it->type() == Node::output_node))
+    QGraphicsItem *it = MainWindow::instance()->Scene()->itemAt(cx, cy, QTransform());
+    if(it && (it->type() == Node::IN_NODE || it->type() == Node::OUT_NODE))
     {
         Node* target = static_cast<Node*>(it);
         addEdge(target);
     }
 
     //qDebug() << "-------------------";
-    //for(auto* i: MainWindow::Scene->items())
+    //for(auto* i: MainWindow::instance()->Scene()->items())
     //{
     //    qDebug() << i->type() << i;
     //}

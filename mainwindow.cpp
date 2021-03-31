@@ -1,70 +1,173 @@
 #include "mainwindow.h"
+#include <QJsonObject>
+#include <QFile>
+#include <QFileDialog>
+#include <QShortcut>
+#include <QMessageBox>
 
-QGraphicsView* MainWindow::View = nullptr;
-GraphicsScene* MainWindow::Scene = nullptr;
-QGraphicsItem* MainWindow::Center = nullptr;
+MainWindow* MainWindow::m_instance = nullptr;
+
+bool MainWindow::autoSave = false;
+Qt::GlobalColor MainWindow::wireColor = Qt::black;
+bool MainWindow::showAxes = false;
+
+Qt::GlobalColor MainWindow::WireColor()
+{
+    return wireColor;
+}
+
+MainWindow* MainWindow::instance()
+{
+    if(!m_instance)
+        m_instance = new MainWindow;
+    return m_instance;
+}
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
-    this->resize(860,640);
+    resize(860,640);
+    setWindowTitle("");
     QWidget *widget = new QWidget;
     QVBoxLayout* layout = new QVBoxLayout;
 
-    if(!MainWindow::Scene)
-    {
-        MainWindow::Scene = new GraphicsScene;
-        MainWindow::Scene->setSceneRect(QRectF(0, 0, 5000, 5000));
-    }
-    if(!MainWindow::Center)
-    {
-        MainWindow::Center = new QGraphicsEllipseItem(0,0,1,1, nullptr);
-        MainWindow::Scene->addItem(MainWindow::Center);
-    }
-    if(!MainWindow::View)
-        MainWindow::View = new QGraphicsView(MainWindow::Scene);
+    m_Center = new QGraphicsEllipseItem(0,0,1,1, nullptr);
+    m_Scene = new GraphicsScene;
+    m_Scene->setSceneRect(QRectF(-2500, -2500, 5000, 5000));
+    m_Scene->addItem(m_Center);
+    m_View = new QGraphicsView(m_Scene);
 
-
-    setToolBar();
-    setMenuBar();
-
-
-
-    //layout->addWidget(m_toolbox,5);
-    //layout->addWidget(m_graphicsView,95);
-    layout->addWidget(MainWindow::View);
+    layout->addWidget(m_View);
     widget->setLayout(layout);
     setCentralWidget(widget);
 
-
-
-    //Label* l = new Label(SceneItem::INPUT,  140,80,  MainWindow::Center);
-    //Label* m = new Label(SceneItem::INPUT,  -40,80,  MainWindow::Center);
-    //Label* n = new Label(SceneItem::INPUT,  40,80,   MainWindow::Center);
-    //Label* o = new Label(SceneItem::OUTPUT, 190,100, MainWindow::Center);
-    //Label* p = new Label(SceneItem::OUTPUT, 190,100, MainWindow::Center);
-    //
-    //
-    //Operator* a = new Operator(SceneItem::AND,  50,100, MainWindow::Center);
-    //Operator* b = new Operator(SceneItem::XNOR, 50,100, MainWindow::Center);
-    //Operator* c = new Operator(SceneItem::NOR,  50,100, MainWindow::Center);
-    //Operator* d = new Operator(SceneItem::NOT,  50,100, MainWindow::Center);
-    //Operator* e = new Operator(SceneItem::XOR,  50,100, MainWindow::Center);
-    //Operator* f = new Operator(SceneItem::NAND, 50,100, MainWindow::Center);
-    //Operator* g = new Operator(SceneItem::OR,   50,100, MainWindow::Center);
-
+    loadSettings();
+    setToolBar();
+    setMenuBar();
+    loadAxes();
+    setNotUpdatedFlag();
 }
 
 
 MainWindow::~MainWindow()
 {
-    delete MainWindow::Center;
-    delete MainWindow::Scene;
-    delete MainWindow::View;
+    delete m_Center;
+    delete m_Scene;
+    delete m_View;
+    delete m_toolbar_operators;
+    delete m_toolbar_tools;
+    delete m_instance;
+}
+
+void MainWindow::newDocument()
+{
+    if(updated)
+    {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, "Save current file?", "Save current file?",
+                                      QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
+
+        if (reply == QMessageBox::Yes)
+        {
+           save();
+        }
+        else if(reply == QMessageBox::Cancel)
+        {
+           return;
+        }
+    }
+
+    for(QGraphicsItem* it: m_Center->childItems())
+    {
+        if(it->type() == Edge::TYPE::EDGE)
+            delete it;
+    }
+    for(QGraphicsItem* it: m_Center->childItems())
+    {
+        delete it;
+    }
+
+    currentPath = "";
+    setNotUpdatedFlag();
 }
 
 
-void MainWindow::addToScene(QString itemname)
+void MainWindow::loadSettings()
+{
+    QFile file(":/params/settings.json");
+    file.open(QIODevice::ReadOnly | QIODevice::Text);
+    QJsonParseError JsonParseError;
+    QJsonDocument JsonDocument = QJsonDocument::fromJson(file.readAll(), &JsonParseError);
+    file.close();
+
+    QJsonObject settingsJson = JsonDocument.object();
+    autoSave = settingsJson["Autosave"].toBool();
+    wireColor = Qt::GlobalColor(settingsJson["Wire"].toInt());
+    showAxes = settingsJson["Axes"].toBool();
+}
+
+void MainWindow::closeEvent(QCloseEvent* event)
+{
+    QJsonObject settingsJson;
+    settingsJson["Wire"] = wireColor;
+    settingsJson["Autosave"] = autoSave;
+    settingsJson["Axes"] = showAxes;
+    QJsonDocument JsonDocument;
+    JsonDocument.setObject(settingsJson);
+
+    QFile file("C:/Users/vahe2/Documents/Diploma/settings.json");
+    file.open(QFile::WriteOnly | QFile::Text | QFile::Truncate);
+    file.write(JsonDocument.toJson());
+    file.close();
+
+    if(autoSave)
+        if(updated)
+        {
+            QMessageBox::StandardButton reply;
+            reply = QMessageBox::question(this, "Exit without saving?", "Save changes before exit?",
+                                          QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
+
+            if (reply == QMessageBox::Yes)
+            {
+               save();
+            }
+            else if(reply == QMessageBox::Cancel)
+            {
+               event->ignore();
+            }
+        }
+}
+
+void MainWindow::setUpdatedFlag()
+{
+    updated = true;
+    setWindowTitle("(UNSAVED)   " + currentPath);
+}
+
+void MainWindow::setNotUpdatedFlag()
+{
+    updated = false;
+    setWindowTitle(currentPath);
+}
+
+void MainWindow::resetSettings()
+{
+    zoom(0);
+    showAxes = true;
+    showAxesAction->setChecked(true);
+    autoSave = false;
+    autoSaveAction->setChecked(false);
+
+    wireColor = Qt::black;
+    QPen pen(QBrush(wireColor), 2);
+    for(QGraphicsItem* it:m_Center->childItems())
+    {
+        if(it->type() == Edge::TYPE::EDGE)
+            static_cast<Edge*>(it)->highlight(pen);
+    }
+}
+
+void MainWindow::setDrawingObject(QString itemname)
 {
     SceneItem::TYPE t;
     if(itemname == "NOT")
@@ -90,12 +193,227 @@ void MainWindow::addToScene(QString itemname)
     else
         return;
 
-    MainWindow::Scene->setCurrent(t);
+    m_Scene->setCurrent(t);
 
     if(t == SceneItem::INPUT || t == SceneItem::OUTPUT)
-        MainWindow::View->setCursor(QCursor(QPixmap(":/Labels/images/" + SceneItem::types[t] + ".png"), 0,0));
+        m_View->setCursor(QCursor(QPixmap(":/Labels/images/" + SceneItem::types[t] + ".png"), 0,0));
     else
-        MainWindow::View->setCursor(QCursor(QPixmap(":/Operators/images/" + SceneItem::types[t] + ".png"), 0,0));
+        m_View->setCursor(QCursor(QPixmap(":/Operators/images/" + SceneItem::types[t] + ".png"), 0,0));
+}
+
+void MainWindow::stopDrawingObject()
+{
+    m_Scene->setDrawing(false);
+    m_Scene->setErasing(false);
+    m_View->setCursor(QCursor());
+}
+
+void MainWindow::zoom(int zoomin)
+{
+    if(zoomin > 0)
+        m_View->scale(1.1, 1.1);
+    else if(zoomin < 0)
+        m_View->scale(0.909, 0.909);
+    else
+        m_View->resetTransform();
+}
+
+void MainWindow::eraser()
+{
+    m_View->setCursor(QCursor(Qt::CursorShape::PointingHandCursor));
+    m_Scene->setErasing(true);
+    m_Scene->setDrawing(false);
+}
+
+void MainWindow::eraseAll()
+{
+    QMessageBox::StandardButton reply;
+      reply = QMessageBox::question(this, "Eraser", "Are you sure you want to erase everything?",
+                                    QMessageBox::Yes|QMessageBox::No);
+
+      if (reply == QMessageBox::Yes)
+      {
+          // firstly delete Edges, then the operators/labels
+          for(QGraphicsItem* it: m_Center->childItems())
+          {
+              if(it->type() == Edge::TYPE::EDGE)
+                  delete it;
+          }
+          for(QGraphicsItem* it: m_Center->childItems())
+          {
+              delete it;
+          }
+
+      }
+}
+
+void MainWindow::save()
+{
+    if(currentPath == "")
+    {
+        QString fileName = QFileDialog::getSaveFileName();
+        if(fileName == "")
+            return;
+        currentPath = fileName;
+    }
+
+    QList<QGraphicsItem*> items = m_Center->childItems();
+    QJsonArray levelObjects, levelEdges;
+
+    for(QGraphicsItem* i: items)
+        if(i->type() == Edge::TYPE::EDGE)
+        {
+            Edge *it = static_cast<Edge*>(i);
+            QJsonObject RootObject;
+
+            QJsonObject left;
+            left["x"] = it->left()->x() + it->left()->r();
+            left["y"] = it->left()->y() + it->left()->r();
+
+            QJsonObject right;
+            right["x"] = it->right()->x() + it->right()->r();
+            right["y"] = it->right()->y() + it->right()->r();
+
+            RootObject["left"] = left;
+            RootObject["right"] = right;
+
+            levelEdges.append(RootObject);
+        }
+        else
+        {
+            SceneItem*it = static_cast<SceneItem*>(i);
+
+            QJsonObject RootObject;
+            RootObject["id"] = it->id();
+            RootObject["type"] = it->type();
+
+            QJsonObject pos;
+            pos["x"] = it->pos().x();
+            pos["y"] = it->pos().y();
+            RootObject["pos"] = pos;
+
+            levelObjects.append(RootObject);
+        }
+
+    QJsonObject finalObject;
+    finalObject["operators"] = levelObjects;
+    finalObject["edges"] = levelEdges;
+
+    QJsonDocument JsonDocument;
+    JsonDocument.setObject(finalObject);
+
+    QFile file(currentPath);
+    file.open(QFile::WriteOnly | QFile::Text | QFile::Truncate);
+    file.write(JsonDocument.toJson());
+    file.close();
+
+    setNotUpdatedFlag();
+}
+
+void MainWindow::load()
+{
+    if(updated)
+    {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, "Save current file?", "Save current file?",
+                                      QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
+
+        if (reply == QMessageBox::Yes)
+        {
+           save();
+        }
+        else if(reply == QMessageBox::Cancel)
+        {
+           return;
+        }
+    }
+    for(QGraphicsItem* it: m_Center->childItems())
+    {
+        if(it->type() == Edge::TYPE::EDGE)
+            delete it;
+    }
+    for(QGraphicsItem* it: m_Center->childItems())
+    {
+        delete it;
+    }
+
+
+    QString fileName = QFileDialog::getOpenFileName();
+    if(fileName == "")
+        return;
+
+    QFile file(fileName);
+    file.open(QIODevice::ReadOnly | QIODevice::Text);
+    QJsonParseError JsonParseError;
+    QJsonDocument JsonDocument = QJsonDocument::fromJson(file.readAll(), &JsonParseError);
+    file.close();
+
+    QJsonObject object = JsonDocument.object();
+
+    QJsonArray operators = object["operators"].toArray();
+    QJsonArray edges = object["edges"].toArray();
+
+    for(QJsonValueRef i: operators)
+    {
+        QJsonObject it = i.toObject();
+
+        SceneItem::TYPE t = static_cast<SceneItem::TYPE>(it["type"].toInt());
+        int id = it["id"].toInt();
+        int x = it["pos"].toObject()["x"].toInt();
+        int y = it["pos"].toObject()["y"].toInt();
+
+        if(t == SceneItem::TYPE::INPUT || t == SceneItem::TYPE::OUTPUT)
+        {
+            new Label(id, t, x, y, m_Center);
+        }
+        else
+        {
+            new Operator(id, t, x, y, m_Center);
+        }
+        m_objectCount = (m_objectCount>id)?m_objectCount:id;
+        m_objectCount++;
+    }
+    for(QJsonValueRef i: edges)
+    {
+        QJsonObject it = i.toObject();
+        int x1 = it["left"].toObject()["x"].toInt();
+        int y1 = it["left"].toObject()["y"].toInt();
+        int x2 = it["right"].toObject()["x"].toInt();
+        int y2 = it["right"].toObject()["y"].toInt();
+
+        Node* left =  static_cast<Node*>(m_Scene->itemAt(QPointF(x1,y1), QTransform()));
+        Node* right = static_cast<Node*>(m_Scene->itemAt(QPointF(x2,y2), QTransform()));
+
+        left->addEdge(right);
+    }
+
+    currentPath = fileName;
+    setNotUpdatedFlag();
+}
+
+void MainWindow::loadAxes()
+{
+    m_Scene->loadAxes(showAxes);
+}
+
+void MainWindow::setAutoSave()
+{
+    autoSave = !autoSave;
+}
+
+void MainWindow::setShowAxes()
+{
+    showAxes = !showAxes;
+    loadAxes();
+}
+
+void MainWindow::about()
+{
+    QMessageBox::question(this, "about", "\tQt version:           5_15_0"
+                                         "\n"
+                                         "\n"
+                                         "\tQt Creator version:   4_8",
+                          QMessageBox::Ok);
 }
 
 
@@ -104,17 +422,45 @@ void MainWindow::setToolBar()
     m_toolbar_operators = addToolBar(tr("Operators"));
     m_toolbar_tools = addToolBar(tr("Tools"));
 
-    QDir dir(":/Tools/images/");
-    for(uint i=0; i< dir.count(); i++)
-    {
-        QAction* action = m_toolbar_tools->addAction(QIcon(":/Tools/images/" +dir[i]), dir[i].split(".")[0]);
-        m_toolbar_tools->addSeparator();
-    }
+    QAction* actionMouse = m_toolbar_tools->addAction(QIcon(":/Tools/images/Mouse.png"), "Mouse");
+    connect(actionMouse, SIGNAL(triggered()),
+            this, SLOT(stopDrawingObject()));
 
-
+    m_toolbar_tools->addSeparator();
     QSignalMapper* signalMapper = new QSignalMapper(this);
 
-    dir.setPath(":/Operators/images/");
+    QAction* actionZoomIn = m_toolbar_tools->addAction(QIcon(":/Tools/images/ZoomIn.png"), "Zoom In");
+    signalMapper->setMapping(actionZoomIn, 1);
+    connect(actionZoomIn, SIGNAL(triggered()),
+            signalMapper, SLOT (map()));
+
+    QAction* actionZoomOut = m_toolbar_tools->addAction(QIcon(":/Tools/images/ZoomOut.png"), "Zoom Out");
+    signalMapper->setMapping(actionZoomOut, -1);
+    connect(actionZoomOut, SIGNAL(triggered()),
+            signalMapper, SLOT (map()));
+
+    QAction* actionZoomReset = m_toolbar_tools->addAction(QIcon(":/Tools/images/ZoomReset.png"), "Reset Zoom");
+    signalMapper->setMapping(actionZoomReset, 0);
+    connect(actionZoomReset, SIGNAL(triggered()),
+            signalMapper, SLOT (map()));
+
+    connect(signalMapper, SIGNAL(mapped(int)),
+            this, SLOT(zoom(int)));
+
+    m_toolbar_tools->addSeparator();
+
+    QAction* actionEraser = m_toolbar_tools->addAction(QIcon(":/Tools/images/Eraser.png"), "Eraser");
+    connect(actionEraser, SIGNAL(triggered()),
+            this, SLOT (eraser()));
+
+    QAction* actionEraseAll = m_toolbar_tools->addAction(QIcon(":/Tools/images/EraseAll.png"), "Erase Everything");
+    connect(actionEraseAll, SIGNAL(triggered()),
+            this, SLOT (eraseAll()));
+
+
+    signalMapper = new QSignalMapper(this);
+
+    QDir dir(":/Operators/images/");
     for(uint i=0; i< dir.count(); i++)
     {
         QString itemname = dir[i].split(".")[0];
@@ -128,7 +474,6 @@ void MainWindow::setToolBar()
 
     m_toolbar_operators->addSeparator();
 
-
     dir.setPath(":/Labels/images/");
     for(uint i=0; i< dir.count(); i++)
     {
@@ -141,36 +486,51 @@ void MainWindow::setToolBar()
                 signalMapper, SLOT (map()));
     }
 
-
     connect(signalMapper, SIGNAL(mapped(QString)),
-            this, SLOT(addToScene(QString)));
+            this, SLOT(setDrawingObject(QString)));
 }
-
 
 
 void MainWindow::setMenuBar()
 {
-
     QMenu* fileMenu = menuBar()->addMenu(tr("&File"));
-    fileMenu->addAction("Open");
-    fileMenu->addAction("New");
+    QAction* newAction = fileMenu->addAction("New");
+    connect(newAction, SIGNAL(triggered()), this, SLOT(newDocument()));
 
-    QMenu* itemMenu = menuBar()->addMenu(tr("&Item"));
-    itemMenu->addAction("Rebuild this file");
-    itemMenu->addSeparator();
-    itemMenu->addAction("Rebuild all");
+    QAction* openAction = fileMenu->addAction("Open");
+    connect(openAction, SIGNAL(triggered()), this, SLOT(load()));
+
+    fileMenu->addSeparator();
+
+    QAction* saveAction = fileMenu->addAction("Save");
+    connect(saveAction, SIGNAL(triggered()), this, SLOT(save()));
+
+    QMenu* itemMenu = menuBar()->addMenu(tr("&Project"));
+    itemMenu->addAction("Build");
+    itemMenu->addAction("Rebuild");
+
+    QMenu* settingsMenu = menuBar()->addMenu(tr("&Settings"));
+
+    QMenu* prefereneMenu = settingsMenu->addMenu("&Preferences");
+
+    autoSaveAction = prefereneMenu->addAction("Auto Save");
+    autoSaveAction->setCheckable(true);
+    autoSaveAction->setChecked(autoSave);
+    connect(autoSaveAction, SIGNAL(triggered()), this, SLOT(setAutoSave()));
+
+    showAxesAction = prefereneMenu->addAction("Show Axes");
+    showAxesAction->setCheckable(true);
+    showAxesAction->setChecked(showAxes);
+    connect(showAxesAction, SIGNAL(triggered()), this, SLOT(setShowAxes()));
+
+
+    QAction* zoomReset = settingsMenu->addAction("Reset Zoom Settings");
+    connect(zoomReset, SIGNAL(triggered()), this, SLOT(zoom()));
+
+    QAction* resetSettingsAction = settingsMenu->addAction("Reset Settings");
+    connect(resetSettingsAction, SIGNAL(triggered()), this, SLOT(resetSettings()));
 
     QMenu* aboutMenu = menuBar()->addMenu(tr("&Help"));
-    aboutMenu->addAction("About");
-
-    //QMenu *file = new QMenu("&File");
-    //file->addAction("Open");
-    //file->addMenu("new");
-    //
-    //QMenu *Build = new QMenu("&Build");
-    //Build->addAction("Rebuild this file");
-    //Build->addAction("Rebuild All");
-    //
-    //m_menubar->addMenu(file);
-    //m_menubar->addMenu(Build);
+    QAction* aboutAction = aboutMenu->addAction("About");
+    connect(aboutAction, SIGNAL(triggered()), this, SLOT(about()));
 }

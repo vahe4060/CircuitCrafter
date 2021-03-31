@@ -7,19 +7,20 @@ class Node;
 
 class Edge : public QGraphicsItemGroup
 {
-
 public:
+    enum TYPE
+    {
+        EDGE = UserType + 5
+    };
+
     Edge(Node *first, Node *second);
     ~Edge();
+    Node* left() const { return m_left; }
+    Node* right() const { return m_right; }
     void adjust();
     void highlight(QPen& pen);
-    //virtual QRectF boundingRect() const override;
-    //QPainterPath shape() const override;
-    //void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
-    //void update(const QRectF &rect = QRectF());
-//protected:
-//    void advance(int step) override;
+    virtual int type() const override { return TYPE::EDGE; }
 
 protected:
     QGraphicsLineItem *h_line1 = nullptr; // buttom horizonal line

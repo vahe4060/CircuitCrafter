@@ -18,7 +18,7 @@ Input_Node::~Input_Node()
 
 void Input_Node::addEdge(Node *other)
 {
-    if(!areConnected(other) && other->type() == Node::output_node)
+    if(!areConnected(other) && other->type() == Node::OUT_NODE)
     {
         if(!m_edges.empty())
         {
