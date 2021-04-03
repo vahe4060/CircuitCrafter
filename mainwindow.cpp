@@ -59,6 +59,104 @@ MainWindow::~MainWindow()
     delete m_instance;
 }
 
+bool MainWindow::check()
+{
+    save();
+
+    QList<QGraphicsItem*> items = m_Center->childItems();
+    for(int i=items.size() - 1; i >= 0; i--)
+        if(items[i]->type() == Edge::TYPE::EDGE)
+        {
+            items.removeAt(i);
+        }
+
+    int output_count = 0;
+    int input_count = 0;
+    for(QGraphicsItem* i: items)
+    {
+        SceneItem* it = static_cast<SceneItem*>(i);
+
+        if(it->type() != SceneItem::TYPE::INPUT && it->isDanglingInput())
+        {
+            QMessageBox::warning(this, "Error", "Debug failed. Dangling input detected: "+ it->toString() + " " + QString::number(it->id()),
+                              QMessageBox::Ok);
+            QPen p(Qt::red);
+            p.setWidth(4);
+            it->setSelected(true);
+            it->highlight(p);
+            return false;
+        }
+        else if(it->type() != SceneItem::TYPE::OUTPUT && it->isDanglingOutput())
+        {
+            QMessageBox::warning(this, "Error", "Debug failed. Dangling output detected: "+ it->toString() + " " + QString::number(it->id()),
+                              QMessageBox::Ok);
+            QPen p(Qt::red);
+            p.setWidth(4);
+            it->setSelected(true);
+            it->highlight(p);
+            return false;
+        }
+
+        switch(i->type())
+        {
+            case SceneItem::TYPE::OUTPUT:
+                output_count++;
+                break;
+            case SceneItem::TYPE::INPUT:
+                input_count++;
+                break;
+            default: break;
+        }
+    }
+
+    if(!output_count)
+    {
+        QMessageBox::warning(this, "Error", "Debug failed. Please provide output label(s) for your scheme",
+                              QMessageBox::Ok);
+        return false;
+    }
+    if(!input_count)
+    {
+        QMessageBox::warning(this, "Error", "Debug failed. Please provide input label(s) for your scheme",
+                              QMessageBox::Ok);
+        return false;
+    }
+
+    return true;
+}
+
+void MainWindow::debug()
+{
+    if(!check())
+    {
+        return;
+    }
+
+    QList<QGraphicsItem*> items = m_Center->childItems();
+
+    for(int i=items.size() - 1; i >= 0; i--)
+        if(items[i]->type() == Edge::TYPE::EDGE)
+        {
+            items.removeAt(i);
+        }
+
+    Verilog_Parser p(currentPath);
+    for(QGraphicsItem* i: items)
+    {
+        SceneItem* it = static_cast<SceneItem*>(i);
+        if(it->type() == SceneItem::TYPE::INPUT)
+            p.input(it);
+        else if(it->type() == SceneItem::TYPE::OUTPUT)
+            p.output(it);
+        else
+        {
+            p.wire(it);
+            p.operand(it);
+        }
+    }
+    p.parse();
+}
+
 void MainWindow::newDocument()
 {
     if(updated)
@@ -76,21 +174,11 @@ void MainWindow::newDocument()
            return;
         }
     }
-
-    for(QGraphicsItem* it: m_Center->childItems())
-    {
-        if(it->type() == Edge::TYPE::EDGE)
-            delete it;
-    }
-    for(QGraphicsItem* it: m_Center->childItems())
-    {
-        delete it;
-    }
+    m_Scene->clear();
 
     currentPath = "";
     setNotUpdatedFlag();
 }
-
 
 void MainWindow::loadSettings()
 {
@@ -232,26 +320,14 @@ void MainWindow::eraseAll()
                                     QMessageBox::Yes|QMessageBox::No);
 
       if (reply == QMessageBox::Yes)
-      {
-          // firstly delete Edges, then the operators/labels
-          for(QGraphicsItem* it: m_Center->childItems())
-          {
-              if(it->type() == Edge::TYPE::EDGE)
-                  delete it;
-          }
-          for(QGraphicsItem* it: m_Center->childItems())
-          {
-              delete it;
-          }
-
-      }
+         m_Scene->clear();
 }
 
 void MainWindow::save()
 {
     if(currentPath == "")
     {
-        QString fileName = QFileDialog::getSaveFileName();
+        QString fileName = QFileDialog::getSaveFileName(nullptr, QString(), QString(), QString("Circuit file (*.circuit);"));
         if(fileName == "")
             return;
         currentPath = fileName;
@@ -288,8 +364,8 @@ void MainWindow::save()
             RootObject["type"] = it->type();
 
             QJsonObject pos;
-            pos["x"] = it->pos().x();
-            pos["y"] = it->pos().y();
+            pos["x"] = int(it->pos().x());
+            pos["y"] = int(it->pos().y());
             RootObject["pos"] = pos;
 
             levelObjects.append(RootObject);
@@ -327,18 +403,10 @@ void MainWindow::load()
            return;
         }
     }
-    for(QGraphicsItem* it: m_Center->childItems())
-    {
-        if(it->type() == Edge::TYPE::EDGE)
-            delete it;
-    }
-    for(QGraphicsItem* it: m_Center->childItems())
-    {
-        delete it;
-    }
+    m_Scene->clear();
 
 
-    QString fileName = QFileDialog::getOpenFileName();
+    QString fileName = QFileDialog::getOpenFileName(nullptr, QString(), QString(), QString("Circuit file (*.circuit);"));
     if(fileName == "")
         return;
 
@@ -371,7 +439,6 @@ void MainWindow::load()
             new Operator(id, t, x, y, m_Center);
         }
         m_objectCount = (m_objectCount>id)?m_objectCount:id;
-        m_objectCount++;
     }
     for(QJsonValueRef i: edges)
     {
@@ -409,13 +476,9 @@ void MainWindow::setShowAxes()
 
 void MainWindow::about()
 {
-    QMessageBox::question(this, "about", "\tQt version:           5.15.0"
-                                         "\n"
-                                         "\n"
-                                         "\tQt Creator version:   4.12.4",
+    QMessageBox::question(this, "about", "\tQt version:           5.15.0\n\n\tQt Creator version:   4.12.4",
                           QMessageBox::Ok);
 }
-
 
 void MainWindow::setToolBar()
 {
@@ -490,7 +553,6 @@ void MainWindow::setToolBar()
             this, SLOT(setDrawingObject(QString)));
 }
 
-
 void MainWindow::setMenuBar()
 {
     QMenu* fileMenu = menuBar()->addMenu(tr("&File"));
@@ -506,8 +568,11 @@ void MainWindow::setMenuBar()
     connect(saveAction, SIGNAL(triggered()), this, SLOT(save()));
 
     QMenu* itemMenu = menuBar()->addMenu(tr("&Project"));
-    itemMenu->addAction("Build");
-    itemMenu->addAction("Rebuild");
+    QAction* debugAction = itemMenu->addAction("Convert to Verilog");
+    connect(debugAction, SIGNAL(triggered()), this, SLOT(debug()));
+
+    QAction* checkAction = itemMenu->addAction("Check");
+    connect(checkAction, SIGNAL(triggered()), this, SLOT(check()));
 
     QMenu* settingsMenu = menuBar()->addMenu(tr("&Settings"));
 

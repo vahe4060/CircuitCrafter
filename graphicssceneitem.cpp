@@ -35,7 +35,6 @@ SceneItem::SceneItem(const int id, TYPE t, int x, int y, QGraphicsItem* parent) 
     MainWindow::instance()->setUpdatedFlag();
 }
 
-
 SceneItem::~SceneItem()
 {
     delete m_pixmap;
@@ -48,7 +47,34 @@ SceneItem::~SceneItem()
     {
         delete i;
     }
+
+    MainWindow::instance()->setUpdatedFlag();
 }
+
+void SceneItem::setSelected(bool state)
+{
+    m_pixmap->setSelected(state);
+}
+
+QVector<SceneItem*> SceneItem::inputs() const
+{
+    QVector<SceneItem*> ins;
+    ins.reserve(m_inputs.size());
+    for(Node* i: m_inputs)
+        for(Node* j: i->nodes())
+            ins.push_back(static_cast<SceneItem*>(j->parentItem()));
+    return ins;
+}
+
+QVector<SceneItem*> SceneItem::outputs() const
+{
+    QVector<SceneItem*> outs;
+    for(Node* i: m_outputs)
+        for(Node* j: i->nodes())
+            outs.push_back(static_cast<SceneItem*>(j->parentItem()));
+    return outs;
+}
+
 
 void SceneItem::highlight(QPen &pen)
 {
@@ -78,4 +104,18 @@ void SceneItem::setPos(QPointF pos)
     MainWindow::instance()->setUpdatedFlag();
 }
 
+bool SceneItem::isDanglingInput() const
+{
+    for(Node* i: m_inputs)
+        if(i->nodes().isEmpty())
+            return true;
+    return false;
+}
 
+bool SceneItem::isDanglingOutput() const
+{
+    for(Node* i: m_outputs)
+        if(i->nodes().isEmpty())
+            return true;
+    return false;
+}

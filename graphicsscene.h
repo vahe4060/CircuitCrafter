@@ -15,6 +15,8 @@ public:
     void setDrawing(bool d);
     void setErasing(bool e);
     void loadAxes(bool load);
+    void clear();
+
 protected:
     virtual void keyPressEvent(QKeyEvent *event);
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);

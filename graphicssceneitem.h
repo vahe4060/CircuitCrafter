@@ -21,16 +21,23 @@ public:
     };
     static QMap<TYPE, QString> types;
 
-    explicit SceneItem(TYPE t, int x, int y, QGraphicsItem* parent=nullptr);
-    explicit SceneItem(const int id, TYPE t, int x, int y, QGraphicsItem* parent=nullptr);
+    SceneItem(TYPE t, int x, int y, QGraphicsItem* parent=nullptr);
+    SceneItem(const int id, TYPE t, int x, int y, QGraphicsItem* parent=nullptr);
 
     virtual ~SceneItem();
 
+    void setSelected(bool state);
     virtual void highlight(QPen& pen);
     virtual void setPos(QPointF pos);
     virtual int type() const override { return m_t; }
     virtual int id() const { return m_id; }
     virtual void execute() = 0;
+
+    QString toString() const { return SceneItem::types[m_t]; }
+    QVector<SceneItem*> inputs() const;
+    QVector<SceneItem*> outputs() const;
+    bool isDanglingInput() const;
+    bool isDanglingOutput() const;
 
 protected:
     QVector<Input_Node*> m_inputs;

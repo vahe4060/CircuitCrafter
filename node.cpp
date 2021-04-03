@@ -80,6 +80,10 @@ void Node::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
     //qDebug() << "-------------------";
 }
 
+QList<Node*> Node::nodes() const
+{
+    return m_edges.keys();
+}
 
 int Node::x() const
 {
@@ -95,4 +99,3 @@ int Node::r() const
 {
     return radius;
 }
-

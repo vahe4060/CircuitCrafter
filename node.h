@@ -21,6 +21,8 @@ public:
     int y() const;
     int r() const;
 
+    QList<Node*> nodes() const;
+
     void highlight(QPen& pen);
     virtual void adjust();
     virtual int type() const = 0; //override { return Type; }

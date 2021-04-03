@@ -20,7 +20,8 @@ SOURCES += \
     mainwindow.cpp \
     node.cpp \
     operators.cpp \
-    output_node.cpp
+    output_node.cpp \
+    verilog_parser.cpp
 
 HEADERS += \
     edge.h \
@@ -33,7 +34,8 @@ HEADERS += \
     mainwindow.h \
     node.h \
     operators.h \
-    output_node.h
+    output_node.h \
+    verilog_parser.h
 
 FORMS += \
     mainwindow.ui

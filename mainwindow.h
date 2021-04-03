@@ -12,6 +12,7 @@
 #include "operators.h"
 #include "graphicslineitem.h"
 #include "graphicsscene.h"
+#include "verilog_parser.h"
 
 
 QT_BEGIN_NAMESPACE
@@ -37,6 +38,8 @@ public slots:
     void setUpdatedFlag();
     void setNotUpdatedFlag();
     void about();
+    void debug();
+    bool check();
 
 public:
    // MainWindow(QWidget *parent = nullptr);
@@ -50,7 +53,7 @@ public:
 
     int NextID() { return ++m_objectCount; }
     QGraphicsView* View() const { return m_View; }
-    QGraphicsScene* Scene() const { return m_Scene; }
+    GraphicsScene* Scene() const { return m_Scene; }
     QGraphicsItem* Center() const { return m_Center; }
     static Qt::GlobalColor WireColor();
 

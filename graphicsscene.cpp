@@ -52,6 +52,20 @@ void GraphicsScene::setErasing(bool e)
     erasing = e;
 }
 
+void GraphicsScene::clear()
+{
+    // firstly delete Edges, then the operators/labels
+    for(QGraphicsItem* it: MainWindow::instance()->Center()->childItems())
+    {
+        if(it->type() == Edge::TYPE::EDGE)
+            delete it;
+    }
+    for(QGraphicsItem* it: MainWindow::instance()->Center()->childItems())
+    {
+        delete it;
+    }
+}
+
 void GraphicsScene::keyPressEvent(QKeyEvent* event)
 {
     if(event->key() ==  Qt::Key_Escape)
