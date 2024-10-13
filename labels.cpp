@@ -8,7 +8,7 @@ Label::Label(TYPE t, int x, int y, QGraphicsItem* parent): SceneItem(t, x, y, pa
         m_inputs.push_back(new Input_Node(-11, 8, 6, this));
 
 
-    m_pixmap = new GraphicsPixmapItem(QPixmap(":/Labels/images/" + SceneItem::types[t] + ".png"), this);
+    m_pixmap = new GraphicsPixmapItem(QPixmap(":/Labels/src/" + SceneItem::types[t] + ".png"), this);
 }
 
 
@@ -20,7 +20,7 @@ Label::Label(const int id, TYPE t, int x, int y, QGraphicsItem* parent): SceneIt
         m_inputs.push_back(new Input_Node(-11, 8, 6, this));
 
 
-    m_pixmap = new GraphicsPixmapItem(QPixmap(":/Labels/images/" + SceneItem::types[t] + ".png"), this);
+    m_pixmap = new GraphicsPixmapItem(QPixmap(":/Labels/src/" + SceneItem::types[t] + ".png"), this);
 }
 
 

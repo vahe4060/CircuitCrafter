@@ -284,9 +284,9 @@ void MainWindow::setDrawingObject(QString itemname)
     m_Scene->setCurrent(t);
 
     if(t == SceneItem::INPUT || t == SceneItem::OUTPUT)
-        m_View->setCursor(QCursor(QPixmap(":/Labels/images/" + SceneItem::types[t] + ".png"), 0,0));
+        m_View->setCursor(QCursor(QPixmap(":/Labels/src/" + SceneItem::types[t] + ".png"), 0,0));
     else
-        m_View->setCursor(QCursor(QPixmap(":/Operators/images/" + SceneItem::types[t] + ".png"), 0,0));
+        m_View->setCursor(QCursor(QPixmap(":/Operators/src/" + SceneItem::types[t] + ".png"), 0,0));
 }
 
 void MainWindow::stopDrawingObject()
@@ -490,7 +490,7 @@ void MainWindow::setToolBar()
     m_toolbar_operators = addToolBar(tr("Operators"));
     m_toolbar_tools = addToolBar(tr("Tools"));
 
-    QAction* actionMouse = m_toolbar_tools->addAction(QIcon(":/Tools/images/Mouse.png"), "Mouse");
+    QAction* actionMouse = m_toolbar_tools->addAction(QIcon(":/Tools/src/Mouse.png"), "Mouse");
     connect(actionMouse, SIGNAL(triggered()),
             this, SLOT(stopDrawingObject()));
 
@@ -500,9 +500,9 @@ void MainWindow::setToolBar()
     // mapping signal to slot with non-vod arguments
     QSignalMapper* signalMapper = new QSignalMapper(this);
 
-    QAction* actionZoomIn = m_toolbar_tools->addAction(QIcon(":/Tools/images/ZoomIn.png"), "Zoom In");
-    QAction* actionZoomOut = m_toolbar_tools->addAction(QIcon(":/Tools/images/ZoomOut.png"), "Zoom Out");
-    QAction* actionZoomReset = m_toolbar_tools->addAction(QIcon(":/Tools/images/ZoomReset.png"), "Reset Zoom");
+    QAction* actionZoomIn = m_toolbar_tools->addAction(QIcon(":/Tools/src/ZoomIn.png"), "Zoom In");
+    QAction* actionZoomOut = m_toolbar_tools->addAction(QIcon(":/Tools/src/ZoomOut.png"), "Zoom Out");
+    QAction* actionZoomReset = m_toolbar_tools->addAction(QIcon(":/Tools/src/ZoomReset.png"), "Reset Zoom");
 
     connect(actionZoomIn, SIGNAL(triggered()), signalMapper, SLOT (map()));
     connect(actionZoomOut, SIGNAL(triggered()), signalMapper, SLOT (map()));
@@ -517,26 +517,26 @@ void MainWindow::setToolBar()
 
     m_toolbar_tools->addSeparator();
 
-    QAction* actionEraser = m_toolbar_tools->addAction(QIcon(":/Tools/images/Eraser.png"), "Eraser");
+    QAction* actionEraser = m_toolbar_tools->addAction(QIcon(":/Tools/src/Eraser.png"), "Eraser");
     connect(actionEraser, SIGNAL(triggered()), this, SLOT (eraser()));
 
-    QAction* actionEraseAll = m_toolbar_tools->addAction(QIcon(":/Tools/images/EraseAll.png"), "Erase Everything");
+    QAction* actionEraseAll = m_toolbar_tools->addAction(QIcon(":/Tools/src/EraseAll.png"), "Erase Everything");
     connect(actionEraseAll, SIGNAL(triggered()), this, SLOT (eraseAll()));
 
     // APPROACH 2
     // mapping signal to slot with non-vod arguments
     QSignalMapper *signalMapper2 = new QSignalMapper(this);
 
-    QAction* action1 = m_toolbar_operators->addAction(QIcon(":/Operators/images/NOT.png"), "NOT");
-    QAction* action2 = m_toolbar_operators->addAction(QIcon(":/Operators/images/AND.png"), "AND");
-    QAction* action3 = m_toolbar_operators->addAction(QIcon(":/Operators/images/OR.png"),  "OR");
-    QAction* action4 = m_toolbar_operators->addAction(QIcon(":/Operators/images/XOR.png"), "XOR");
-    QAction* action5 = m_toolbar_operators->addAction(QIcon(":/Operators/images/NAND.png"), "NAND");
-    QAction* action6 = m_toolbar_operators->addAction(QIcon(":/Operators/images/NOR.png"),  "NOR");
-    QAction* action7 = m_toolbar_operators->addAction(QIcon(":/Operators/images/XNOR.png"), "XNOR");
+    QAction* action1 = m_toolbar_operators->addAction(QIcon(":/Operators/src/NOT.png"), "NOT");
+    QAction* action2 = m_toolbar_operators->addAction(QIcon(":/Operators/src/AND.png"), "AND");
+    QAction* action3 = m_toolbar_operators->addAction(QIcon(":/Operators/src/OR.png"),  "OR");
+    QAction* action4 = m_toolbar_operators->addAction(QIcon(":/Operators/src/XOR.png"), "XOR");
+    QAction* action5 = m_toolbar_operators->addAction(QIcon(":/Operators/src/NAND.png"), "NAND");
+    QAction* action6 = m_toolbar_operators->addAction(QIcon(":/Operators/src/NOR.png"),  "NOR");
+    QAction* action7 = m_toolbar_operators->addAction(QIcon(":/Operators/src/XNOR.png"), "XNOR");
     m_toolbar_operators->addSeparator();
-    QAction* action8 = m_toolbar_operators->addAction(QIcon(":/Operators/images/IN.png"), "IN");
-    QAction* action9 = m_toolbar_operators->addAction(QIcon(":/Operators/images/OUT.png"), "OUT");
+    QAction* action8 = m_toolbar_operators->addAction(QIcon(":/Operators/src/IN.png"), "IN");
+    QAction* action9 = m_toolbar_operators->addAction(QIcon(":/Operators/src/OUT.png"), "OUT");
 
     connect(action1, &QAction::triggered, this, [this] { setDrawingObject("NOT"); });
     connect(action2, &QAction::triggered, this, [this] { setDrawingObject("AND"); });

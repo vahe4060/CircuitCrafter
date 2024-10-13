@@ -13,7 +13,7 @@ Operator::Operator(TYPE t, int x, int y, QGraphicsItem* parent) : SceneItem(t, x
         m_inputs.push_back(new Input_Node(-12, 26, 6, this));
         m_outputs.push_back(new Output_Node(63, 16, 6, this));
     }
-    m_pixmap = new GraphicsPixmapItem(QPixmap(":/Operators/images/" + SceneItem::types[t] + ".png"), this);
+    m_pixmap = new GraphicsPixmapItem(QPixmap(":/Operators/src/" + SceneItem::types[t] + ".png"), this);
 }
 
 
@@ -30,7 +30,7 @@ Operator::Operator(const int id, TYPE t, int x, int y, QGraphicsItem* parent): S
         m_inputs.push_back(new Input_Node(-12, 26, 6, this));
         m_outputs.push_back(new Output_Node(63, 16, 6, this));
     }
-    m_pixmap = new GraphicsPixmapItem(QPixmap(":/Operators/images/" + SceneItem::types[t] + ".png"), this);
+    m_pixmap = new GraphicsPixmapItem(QPixmap(":/Operators/src/" + SceneItem::types[t] + ".png"), this);
 }
 
 

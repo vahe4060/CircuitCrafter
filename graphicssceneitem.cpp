@@ -22,7 +22,7 @@ SceneItem::SceneItem(TYPE t, int x, int y, QGraphicsItem* parent) : QGraphicsIte
     setHandlesChildEvents(false);
 
     MainWindow::instance()->setUpdatedFlag();
-    //m_pixmap = new GraphicsPixmapItem(QPixmap(":/LogicOperators/images/" + SceneItem::types[t] + ".png"), this);
+    //m_pixmap = new GraphicsPixmapItem(QPixmap(":/LogicOperators/src/" + SceneItem::types[t] + ".png"), this);
 }
 
 SceneItem::SceneItem(const int id, TYPE t, int x, int y, QGraphicsItem* parent) : QGraphicsItemGroup(parent)

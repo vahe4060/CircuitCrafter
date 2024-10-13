@@ -1,26 +1,26 @@
 <RCC>
     <qresource prefix="/Operators">
-        <file>images/NOT.png</file>
-        <file>images/AND.png</file>
-        <file>images/NAND.png</file>
-        <file>images/OR.png</file>
-        <file>images/NOR.png</file>
-        <file>images/XOR.png</file>
-        <file>images/XNOR.png</file>
+        <file>src/NOT.png</file>
+        <file>src/AND.png</file>
+        <file>src/NAND.png</file>
+        <file>src/OR.png</file>
+        <file>src/NOR.png</file>
+        <file>src/XOR.png</file>
+        <file>src/XNOR.png</file>
     </qresource>
     <qresource prefix="/Tools">
-        <file>images/Mouse.png</file>
-        <file>images/ZoomIn.png</file>
-        <file>images/ZoomOut.png</file>
-        <file>images/Redo.png</file>
-        <file>images/Undo.png</file>
-        <file>images/ZoomReset.png</file>
-        <file>images/Eraser.png</file>
-        <file>images/EraseAll.png</file>
+        <file>src/Mouse.png</file>
+        <file>src/ZoomIn.png</file>
+        <file>src/ZoomOut.png</file>
+        <file>src/Redo.png</file>
+        <file>src/Undo.png</file>
+        <file>src/ZoomReset.png</file>
+        <file>src/Eraser.png</file>
+        <file>src/EraseAll.png</file>
     </qresource>
     <qresource prefix="/Labels">
-        <file>images/IN.png</file>
-        <file>images/OUT.png</file>
+        <file>src/IN.png</file>
+        <file>src/OUT.png</file>
     </qresource>
     <qresource prefix="/params">
         <file>settings.json</file>
