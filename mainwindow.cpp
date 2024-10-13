@@ -31,7 +31,7 @@ MainWindow::MainWindow(QWidget *parent)
     QWidget *widget = new QWidget;
     QVBoxLayout* layout = new QVBoxLayout;
 
-    m_Center = new QGraphicsEllipseItem(0,0,1,1, nullptr);
+    m_Center = (QGraphicsItem*)(new QGraphicsEllipseItem(0,0,1,1, nullptr));
     m_Scene = new GraphicsScene;
     m_Scene->setSceneRect(QRectF(-2500, -2500, 5000, 5000));
     m_Scene->addItem(m_Center);
@@ -161,8 +161,8 @@ void MainWindow::newDocument()
 {
     if(updated)
     {
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this, "Save current file?", "Save current file?",
+        // QMessageBox::StandardButton reply;
+        auto reply = QMessageBox::question(this, "Save current file?", "Save current file?",
                                       QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
 
         if (reply == QMessageBox::Yes)
@@ -211,8 +211,8 @@ void MainWindow::closeEvent(QCloseEvent* event)
     if(autoSave)
         if(updated)
         {
-            QMessageBox::StandardButton reply;
-            reply = QMessageBox::question(this, "Exit without saving?", "Save changes before exit?",
+            // QMessageBox::StandardButton reply;
+            auto reply = QMessageBox::question(this, "Exit without saving?", "Save changes before exit?",
                                           QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
 
             if (reply == QMessageBox::Yes)
@@ -315,19 +315,19 @@ void MainWindow::eraser()
 
 void MainWindow::eraseAll()
 {
-    QMessageBox::StandardButton reply;
-      reply = QMessageBox::question(this, "Eraser", "Are you sure you want to erase everything?",
+    // QMessageBox::StandardButton reply;
+    auto reply = QMessageBox::question(this, "Eraser", "Are you sure you want to erase everything?",
                                     QMessageBox::Yes|QMessageBox::No);
 
-      if (reply == QMessageBox::Yes)
-         m_Scene->clear();
+    if (reply == QMessageBox::Yes)
+        m_Scene->clear();
 }
 
 void MainWindow::save()
 {
     if(currentPath == "")
     {
-        QString fileName = QFileDialog::getSaveFileName(nullptr, QString(), QString(), QString("Circuit file (*.circuit);"));
+        QString fileName = QFileDialog::getSaveFileName(nullptr, QString(), QString(), QString());
         if(fileName == "")
             return;
         currentPath = fileName;
@@ -357,15 +357,15 @@ void MainWindow::save()
         }
         else
         {
-            SceneItem*it = static_cast<SceneItem*>(i);
+            SceneItem *it = static_cast<SceneItem*>(i);
 
             QJsonObject RootObject;
             RootObject["id"] = it->id();
             RootObject["type"] = it->type();
 
             QJsonObject pos;
-            pos["x"] = int(it->pos().x());
-            pos["y"] = int(it->pos().y());
+            pos["x"] = int(i->pos().x());
+            pos["y"] = int(i->pos().y());
             RootObject["pos"] = pos;
 
             levelObjects.append(RootObject);
@@ -390,10 +390,15 @@ void MainWindow::load()
 {
     if(updated)
     {
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this, "Save current file?", "Save current file?",
-                                      QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
-
+        //auto reply = QMessageBox::question(this, "Save current file?", "Save current file?",
+        //                              QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
+        QMessageBox mb("Editor",
+                       "Save current file?",
+                       QMessageBox::Question,
+                       QMessageBox::Yes | QMessageBox::Default,
+                       QMessageBox::No | QMessageBox::Escape,
+                       QMessageBox::NoButton);
+        auto reply = mb.exec();
         if (reply == QMessageBox::Yes)
         {
            save();
@@ -406,7 +411,7 @@ void MainWindow::load()
     m_Scene->clear();
 
 
-    QString fileName = QFileDialog::getOpenFileName(nullptr, QString(), QString(), QString("Circuit file (*.circuit);"));
+    QString fileName = QFileDialog::getOpenFileName(nullptr, QString(), QString(), QString());
     if(fileName == "")
         return;
 
@@ -490,67 +495,60 @@ void MainWindow::setToolBar()
             this, SLOT(stopDrawingObject()));
 
     m_toolbar_tools->addSeparator();
+
+    // APPROACH 1
+    // mapping signal to slot with non-vod arguments
     QSignalMapper* signalMapper = new QSignalMapper(this);
 
     QAction* actionZoomIn = m_toolbar_tools->addAction(QIcon(":/Tools/images/ZoomIn.png"), "Zoom In");
-    signalMapper->setMapping(actionZoomIn, 1);
-    connect(actionZoomIn, SIGNAL(triggered()),
-            signalMapper, SLOT (map()));
-
     QAction* actionZoomOut = m_toolbar_tools->addAction(QIcon(":/Tools/images/ZoomOut.png"), "Zoom Out");
-    signalMapper->setMapping(actionZoomOut, -1);
-    connect(actionZoomOut, SIGNAL(triggered()),
-            signalMapper, SLOT (map()));
-
     QAction* actionZoomReset = m_toolbar_tools->addAction(QIcon(":/Tools/images/ZoomReset.png"), "Reset Zoom");
-    signalMapper->setMapping(actionZoomReset, 0);
-    connect(actionZoomReset, SIGNAL(triggered()),
-            signalMapper, SLOT (map()));
 
-    connect(signalMapper, SIGNAL(mapped(int)),
-            this, SLOT(zoom(int)));
+    connect(actionZoomIn, SIGNAL(triggered()), signalMapper, SLOT (map()));
+    connect(actionZoomOut, SIGNAL(triggered()), signalMapper, SLOT (map()));
+    connect(actionZoomReset, SIGNAL(triggered()), signalMapper, SLOT (map()));
+
+    signalMapper->setMapping(actionZoomReset, 0);
+    signalMapper->setMapping(actionZoomIn, 1);
+    signalMapper->setMapping(actionZoomOut, -1);
+
+    connect(signalMapper, &QSignalMapper::mappedInt, this, &MainWindow::zoom);
+    // APPROACH 1
 
     m_toolbar_tools->addSeparator();
 
     QAction* actionEraser = m_toolbar_tools->addAction(QIcon(":/Tools/images/Eraser.png"), "Eraser");
-    connect(actionEraser, SIGNAL(triggered()),
-            this, SLOT (eraser()));
+    connect(actionEraser, SIGNAL(triggered()), this, SLOT (eraser()));
 
     QAction* actionEraseAll = m_toolbar_tools->addAction(QIcon(":/Tools/images/EraseAll.png"), "Erase Everything");
-    connect(actionEraseAll, SIGNAL(triggered()),
-            this, SLOT (eraseAll()));
+    connect(actionEraseAll, SIGNAL(triggered()), this, SLOT (eraseAll()));
 
+    // APPROACH 2
+    // mapping signal to slot with non-vod arguments
+    QSignalMapper *signalMapper2 = new QSignalMapper(this);
 
-    signalMapper = new QSignalMapper(this);
-
-    QDir dir(":/Operators/images/");
-    for(uint i=0; i< dir.count(); i++)
-    {
-        QString itemname = dir[i].split(".")[0];
-        QAction* action = m_toolbar_operators->addAction(QIcon(":/Operators/images/" +dir[i]), itemname);
-
-        signalMapper->setMapping(action, itemname);
-
-        connect(action, SIGNAL(triggered()),
-                signalMapper, SLOT (map()));
-    }
-
+    QAction* action1 = m_toolbar_operators->addAction(QIcon(":/Operators/images/NOT.png"), "NOT");
+    QAction* action2 = m_toolbar_operators->addAction(QIcon(":/Operators/images/AND.png"), "AND");
+    QAction* action3 = m_toolbar_operators->addAction(QIcon(":/Operators/images/OR.png"),  "OR");
+    QAction* action4 = m_toolbar_operators->addAction(QIcon(":/Operators/images/XOR.png"), "XOR");
+    QAction* action5 = m_toolbar_operators->addAction(QIcon(":/Operators/images/NAND.png"), "NAND");
+    QAction* action6 = m_toolbar_operators->addAction(QIcon(":/Operators/images/NOR.png"),  "NOR");
+    QAction* action7 = m_toolbar_operators->addAction(QIcon(":/Operators/images/XNOR.png"), "XNOR");
     m_toolbar_operators->addSeparator();
+    QAction* action8 = m_toolbar_operators->addAction(QIcon(":/Operators/images/IN.png"), "IN");
+    QAction* action9 = m_toolbar_operators->addAction(QIcon(":/Operators/images/OUT.png"), "OUT");
 
-    dir.setPath(":/Labels/images/");
-    for(uint i=0; i< dir.count(); i++)
-    {
-        QString itemname = dir[i].split(".")[0];
-        QAction* action = m_toolbar_operators->addAction(QIcon(":/Labels/images/" +dir[i]), itemname);
+    connect(action1, &QAction::triggered, this, [this] { setDrawingObject("NOT"); });
+    connect(action2, &QAction::triggered, this, [this] { setDrawingObject("AND"); });
+    connect(action3, &QAction::triggered, this, [this] { setDrawingObject("OR"); });
+    connect(action4, &QAction::triggered, this, [this] { setDrawingObject("XOR"); });
+    connect(action5, &QAction::triggered, this, [this] { setDrawingObject("NAND"); });
+    connect(action6, &QAction::triggered, this, [this] { setDrawingObject("NOR"); });
+    connect(action7, &QAction::triggered, this, [this] { setDrawingObject("XNOR"); });
+    connect(action8, &QAction::triggered, this, [this] { setDrawingObject("IN"); });
+    connect(action9, &QAction::triggered, this, [this] { setDrawingObject("OUT"); });
+    // APPROACH 2
 
-        signalMapper->setMapping(action, itemname);
-
-        connect(action, SIGNAL(triggered()),
-                signalMapper, SLOT (map()));
-    }
-
-    connect(signalMapper, SIGNAL(mapped(QString)),
-            this, SLOT(setDrawingObject(QString)));
 }
 
 void MainWindow::setMenuBar()
