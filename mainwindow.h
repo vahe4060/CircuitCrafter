@@ -46,6 +46,11 @@ public:
    // ~MainWindow();
 
     static MainWindow* instance();
+    int popUpDialog(const QString &name,
+                           const QString &text,
+                           QMessageBox::Icon icon,
+                           QMessageBox::StandardButtons buttons
+                           );
     ~MainWindow();
 
     MainWindow& operator=(const MainWindow&) = delete;
@@ -82,8 +87,6 @@ protected:
     void setToolBar();
     void setMenuBar();
     void loadSettings();
-
-
 };
 
 #endif // MAINWINDOW_H

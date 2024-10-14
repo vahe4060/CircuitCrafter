@@ -37,7 +37,6 @@ void Input_Node::removeEdge(Node* other)
 {
     if(areConnected(other))
     {
-        Edge* e = m_edges.first();
         m_edges.clear();
         other->removeEdge(this);
         //delete e;

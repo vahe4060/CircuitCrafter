@@ -111,8 +111,8 @@ void Verilog_Parser::parse()
     out << "\nendmodule\n";
 
 
-    QMessageBox::question(nullptr, "Debug", "Verilog saved in " + m_path+".v",
-                          QMessageBox::Ok);
+    QMessageBox mb(QMessageBox::Question, "Editor", "Verilog saved in " + m_path+".v");
+    mb.exec();
 }
 
 

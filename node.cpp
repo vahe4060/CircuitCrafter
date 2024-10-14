@@ -10,7 +10,7 @@ Node::Node(int xpos, int ypos, const int radius, QGraphicsItem* parent) : QGraph
     setZValue(3);
     //setFlag(ItemIsMovable);
     //MainWindow::instance()->Scene()->addItem(this);
-    QGraphicsLineItem* line = new QGraphicsLineItem;
+    /////QGraphicsLineItem* line = new QGraphicsLineItem;
 }
 
 void Node::adjust()
@@ -45,6 +45,7 @@ void Node::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
 void Node::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
+    (void *)event;
     line = new QGraphicsLineItem;
     MainWindow::instance()->Scene()->addItem(line);
 

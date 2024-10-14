@@ -81,10 +81,12 @@ void GraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     if(drawing)
     {
+        SceneItem* it;
         if(type == SceneItem::INPUT || type == SceneItem::OUTPUT)
-            SceneItem* it = new Label(type, event->scenePos().x(), event->scenePos().y(), MainWindow::instance()->Center());
+            it = new Label(type, event->scenePos().x(), event->scenePos().y(), MainWindow::instance()->Center());
         else
-            SceneItem* it = new Operator(type, event->scenePos().x(),event->scenePos().y(), MainWindow::instance()->Center());
+            it = new Operator(type, event->scenePos().x(),event->scenePos().y(), MainWindow::instance()->Center());
+        (void *)it;
     }
     else if(erasing)
     {

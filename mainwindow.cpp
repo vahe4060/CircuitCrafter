@@ -59,6 +59,15 @@ MainWindow::~MainWindow()
     delete m_instance;
 }
 
+int MainWindow::popUpDialog(const QString &name,
+                const QString &text,
+                QMessageBox::Icon icon,
+                QMessageBox::StandardButtons buttons
+                )
+{
+    return QMessageBox(icon, name, text, buttons).exec();
+}
+
 bool MainWindow::check()
 {
     save();
@@ -78,8 +87,11 @@ bool MainWindow::check()
 
         if(it->type() != SceneItem::TYPE::INPUT && it->isDanglingInput())
         {
-            QMessageBox::warning(this, "Error", "Debug failed. Dangling input detected: "+ it->toString() + " " + QString::number(it->id()),
-                              QMessageBox::Ok);
+            popUpDialog("Editor",
+                        "Debug failed. Dangling input detected: "
+                            + it->toString() + " " + QString::number(it->id()),
+                        QMessageBox::Warning,
+                        QMessageBox::Ok);
             QPen p(Qt::red);
             p.setWidth(4);
             it->setSelected(true);
@@ -88,8 +100,10 @@ bool MainWindow::check()
         }
         else if(it->type() != SceneItem::TYPE::OUTPUT && it->isDanglingOutput())
         {
-            QMessageBox::warning(this, "Error", "Debug failed. Dangling output detected: "+ it->toString() + " " + QString::number(it->id()),
-                              QMessageBox::Ok);
+            popUpDialog("Editor", "Debug failed. Dangling output detected: "
+                                  + it->toString() + " " + QString::number(it->id()),
+                        QMessageBox::Warning,
+                        QMessageBox::Ok);
             QPen p(Qt::red);
             p.setWidth(4);
             it->setSelected(true);
@@ -111,14 +125,18 @@ bool MainWindow::check()
 
     if(!output_count)
     {
-        QMessageBox::warning(this, "Error", "Debug failed. Please provide output label(s) for your scheme",
-                              QMessageBox::Ok);
+        popUpDialog("Error",
+                    "Debug failed. Please provide output label(s) for your scheme",
+                    QMessageBox::Warning,
+                    QMessageBox::Ok);
         return false;
     }
     if(!input_count)
     {
-        QMessageBox::warning(this, "Error", "Debug failed. Please provide input label(s) for your scheme",
-                              QMessageBox::Ok);
+        popUpDialog("Error",
+                    "Debug failed. Please provide input label(s) for your scheme",
+                    QMessageBox::Warning,
+                    QMessageBox::Ok);
         return false;
     }
 
@@ -161,9 +179,9 @@ void MainWindow::newDocument()
 {
     if(updated)
     {
-        // QMessageBox::StandardButton reply;
-        auto reply = QMessageBox::question(this, "Save current file?", "Save current file?",
-                                      QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
+        auto reply = popUpDialog("Editor", "Save current file?",
+                                 QMessageBox::Question,
+                                 QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
 
         if (reply == QMessageBox::Yes)
         {
@@ -212,8 +230,9 @@ void MainWindow::closeEvent(QCloseEvent* event)
         if(updated)
         {
             // QMessageBox::StandardButton reply;
-            auto reply = QMessageBox::question(this, "Exit without saving?", "Save changes before exit?",
-                                          QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
+            auto reply = popUpDialog("Editor", "Save changes before exit?",
+                                     QMessageBox::Question,
+                                     QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
 
             if (reply == QMessageBox::Yes)
             {
@@ -316,8 +335,9 @@ void MainWindow::eraser()
 void MainWindow::eraseAll()
 {
     // QMessageBox::StandardButton reply;
-    auto reply = QMessageBox::question(this, "Eraser", "Are you sure you want to erase everything?",
-                                    QMessageBox::Yes|QMessageBox::No);
+    auto reply = popUpDialog("Editor", "Are you sure you want to erase everything?",
+                             QMessageBox::Question,
+                             QMessageBox::Yes|QMessageBox::No);
 
     if (reply == QMessageBox::Yes)
         m_Scene->clear();
@@ -390,15 +410,9 @@ void MainWindow::load()
 {
     if(updated)
     {
-        //auto reply = QMessageBox::question(this, "Save current file?", "Save current file?",
-        //                              QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
-        QMessageBox mb("Editor",
-                       "Save current file?",
-                       QMessageBox::Question,
-                       QMessageBox::Yes | QMessageBox::Default,
-                       QMessageBox::No | QMessageBox::Escape,
-                       QMessageBox::NoButton);
-        auto reply = mb.exec();
+        auto reply = popUpDialog("Editor", "Save current file?",
+                                 QMessageBox::Question,
+                                 QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
         if (reply == QMessageBox::Yes)
         {
            save();
@@ -408,13 +422,11 @@ void MainWindow::load()
            return;
         }
     }
-    m_Scene->clear();
-
-
     QString fileName = QFileDialog::getOpenFileName(nullptr, QString(), QString(), QString());
     if(fileName == "")
         return;
 
+    m_Scene->clear();
     QFile file(fileName);
     file.open(QIODevice::ReadOnly | QIODevice::Text);
     QJsonParseError JsonParseError;
@@ -481,8 +493,10 @@ void MainWindow::setShowAxes()
 
 void MainWindow::about()
 {
-    QMessageBox::question(this, "about", "\tQt version:           5.15.0\n\n\tQt Creator version:   4.12.4",
-                          QMessageBox::Ok);
+    popUpDialog("Editor",
+                "\tQt version:           6.7.3",
+                QMessageBox::Question,
+                QMessageBox::Ok);
 }
 
 void MainWindow::setToolBar()
@@ -525,7 +539,6 @@ void MainWindow::setToolBar()
 
     // APPROACH 2
     // mapping signal to slot with non-vod arguments
-    QSignalMapper *signalMapper2 = new QSignalMapper(this);
 
     QAction* action1 = m_toolbar_operators->addAction(QIcon(":/Operators/src/NOT.png"), "NOT");
     QAction* action2 = m_toolbar_operators->addAction(QIcon(":/Operators/src/AND.png"), "AND");

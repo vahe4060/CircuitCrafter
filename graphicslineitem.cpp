@@ -110,7 +110,6 @@ QVariant GraphicsLineItem::itemChange(GraphicsItemChange change, const QVariant 
 QRectF GraphicsLineItem::boundingRect() const
 {
     qreal extra = (pen().width() + 2) / 2.0;
-    qreal w = pen().width();
     return QRectF(line().p1(), QSizeF(line().p2().x() - line().p1().x(),
                                       line().p2().y() - line().p1().y()))
         .normalized()
