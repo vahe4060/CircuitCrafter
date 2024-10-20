@@ -89,4 +89,80 @@ protected:
     void loadSettings();
 };
 
+
+
 #endif // MAINWINDOW_H
+
+#ifdef EXPERIMENTAL
+
+
+class MainWindow : public QMainWindow
+{
+    Q_OBJECT
+public slots:
+    void setDrawingObject(QString itemtype);
+    void stopDrawingObject();
+    void zoom(int zoomin = 0);
+    void save();
+    void load();
+    void eraser();
+    void eraseAll();
+    void resetSettings();
+    void setAutoSave();
+    void setShowAxes();
+    void newDocument();
+    void about();
+    void debug();
+    bool check();
+
+public:
+    static MainWindow* instance();
+    int popUpDialog(const QString &name,
+                    const QString &text,
+                    QMessageBox::Icon icon,
+                    QMessageBox::StandardButtons buttons
+                    );
+    ~MainWindow();
+    int NextID() { return ++m_objectCount; }
+    QGraphicsView* View() const { return m_View; }
+    GraphicsScene* Scene() const { return m_Scene; }
+    QGraphicsItem* Center() const { return m_Center; }
+    static Qt::GlobalColor WireColor();
+
+private:
+    static MainWindow* m_instance;
+    static bool autoSave;
+    static bool showAxes;
+    static Qt::GlobalColor wireColor;
+
+    int m_objectCount = 0; // TODO:  make it size_t
+    QGraphicsView* m_View = nullptr;
+    GraphicsScene* m_Scene = nullptr;
+    QGraphicsItem* m_Center = nullptr;
+
+    QToolBar* m_toolbar_operators = nullptr;
+    QToolBar* m_toolbar_tools = nullptr;
+
+    QAction* autoSaveAction = nullptr;
+    QAction* showAxesAction = nullptr;
+
+    QString currentPath = "";
+    bool updated = false;
+
+    MainWindow(QWidget *parent = nullptr);
+    virtual void closeEvent(QCloseEvent* event) override;
+    MainWindow& operator=(const MainWindow&) = delete;
+    MainWindow(const MainWindow&) = delete;
+
+private: //  helpers
+    void setToolBar();
+    void setMenuBar();
+    void loadSettings();
+    void loadAxes();
+    void setUpdatedFlag();
+    void setNotUpdatedFlag();
+};
+
+
+#endif
+

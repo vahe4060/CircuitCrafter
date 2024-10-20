@@ -10,11 +10,11 @@ Simply open the project in Qt Creator and build with QMake.
 
 ### TODO-s
 
-1. Fix Qt deprecated warnings
-2. Refactor to meet a design pattern
-3. Fix leaks
+1. Migrate to Qt6 ✅ 
+2. Refactor to meet a design pattern (MVC) 
+3. Fix leaks (Valgrind)
 4. Add undo/redo stack
-
+5. Add mouse navigation
 
 ### Nice to Have Enhancements
 
