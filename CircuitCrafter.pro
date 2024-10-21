@@ -29,6 +29,7 @@ HEADERS += \
     circuit.h \
     controller.h \
     edge.h \
+    experimental.h \
     graphicslineitem.h \
     graphicspixmapitem.h \
     graphicsscene.h \

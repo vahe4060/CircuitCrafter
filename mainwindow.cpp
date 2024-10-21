@@ -5,6 +5,8 @@
 #include <QShortcut>
 #include <QMessageBox>
 
+#ifndef EXPERIMENTAL
+
 MainWindow* MainWindow::m_instance = nullptr;
 
 bool MainWindow::autoSave = false;
@@ -610,3 +612,9 @@ void MainWindow::setMenuBar()
     QAction* aboutAction = aboutMenu->addAction("About");
     connect(aboutAction, SIGNAL(triggered()), this, SLOT(about()));
 }
+
+#else
+
+
+
+#endif

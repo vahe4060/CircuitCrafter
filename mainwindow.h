@@ -13,11 +13,14 @@
 #include "graphicslineitem.h"
 #include "graphicsscene.h"
 #include "verilog_parser.h"
+#include "experimental.h"
 
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
+
+#ifndef EXPERIMENTAL
 
 class MainWindow : public QMainWindow
 {
@@ -89,16 +92,13 @@ protected:
     void loadSettings();
 };
 
+#else
 
 
-#endif // MAINWINDOW_H
-
-#ifdef EXPERIMENTAL
-
-
-class MainWindow : public QMainWindow
+class MainWindow : public QMainWindow // MVC-View
 {
     Q_OBJECT
+    friend class Controller;
 public slots:
     void setDrawingObject(QString itemtype);
     void stopDrawingObject();
@@ -123,7 +123,6 @@ public:
                     QMessageBox::StandardButtons buttons
                     );
     ~MainWindow();
-    int NextID() { return ++m_objectCount; }
     QGraphicsView* View() const { return m_View; }
     GraphicsScene* Scene() const { return m_Scene; }
     QGraphicsItem* Center() const { return m_Center; }
@@ -166,3 +165,4 @@ private: //  helpers
 
 #endif
 
+#endif // MAINWINDOW_H
