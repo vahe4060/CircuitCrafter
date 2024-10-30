@@ -15,6 +15,9 @@ Simply open the project in Qt Creator and build with QMake.
 3. Fix leaks (Valgrind)
 4. Add undo/redo stack
 5. Add mouse navigation
+6. Add RMBC menu on SceneItem (delete, check)
+7. Keep toolbar positions in settings 
+8. Add tooltip for SceneItem
 
 ### Nice to Have Enhancements
 

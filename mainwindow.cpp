@@ -43,6 +43,7 @@ MainWindow::MainWindow(QWidget *parent)
     widget->setLayout(layout);
     setCentralWidget(widget);
 
+    createUndoStack();
     loadSettings();
     setToolBar();
     setMenuBar();
@@ -67,7 +68,7 @@ int MainWindow::popUpDialog(const QString &name,
                 QMessageBox::StandardButtons buttons
                 )
 {
-    return QMessageBox(icon, name, text, buttons).exec();
+    return QMessageBox(icon, name, text, buttons, this).exec();
 }
 
 bool MainWindow::check()
@@ -90,7 +91,7 @@ bool MainWindow::check()
         if(it->type() != SceneItem::TYPE::INPUT && it->isDanglingInput())
         {
             popUpDialog("Editor",
-                        "Debug failed. Dangling input detected: "
+                        "Compilation failed. Dangling input detected: "
                             + it->toString() + " " + QString::number(it->id()),
                         QMessageBox::Warning,
                         QMessageBox::Ok);
@@ -102,7 +103,7 @@ bool MainWindow::check()
         }
         else if(it->type() != SceneItem::TYPE::OUTPUT && it->isDanglingOutput())
         {
-            popUpDialog("Editor", "Debug failed. Dangling output detected: "
+            popUpDialog("Editor", "Compilation failed. Dangling output detected: "
                                   + it->toString() + " " + QString::number(it->id()),
                         QMessageBox::Warning,
                         QMessageBox::Ok);
@@ -128,7 +129,7 @@ bool MainWindow::check()
     if(!output_count)
     {
         popUpDialog("Error",
-                    "Debug failed. Please provide output label(s) for your scheme",
+                    "Compilation failed. Please provide output label(s) for your scheme",
                     QMessageBox::Warning,
                     QMessageBox::Ok);
         return false;
@@ -136,7 +137,7 @@ bool MainWindow::check()
     if(!input_count)
     {
         popUpDialog("Error",
-                    "Debug failed. Please provide input label(s) for your scheme",
+                    "Compilation failed. Please provide input label(s) for your scheme",
                     QMessageBox::Warning,
                     QMessageBox::Ok);
         return false;
@@ -145,7 +146,27 @@ bool MainWindow::check()
     return true;
 }
 
-void MainWindow::debug()
+void MainWindow::itemMoved(SceneItem *it, const QPointF &newPos)
+{
+    m_undoStack->push(new MoveItemCommand);
+}
+
+void MainWindow::itemNew(SceneItem::TYPE t, const QPointF &pos)
+{
+    m_undoStack->push(new NewItemCommand);
+}
+
+void MainWindow::itemErased(SceneItem *it)
+{
+    m_undoStack->push(new EraseItemCommand);
+}
+
+void MainWindow::allErased()
+{
+    m_undoStack->push(new EraseAllCommand);
+}
+
+void MainWindow::compile()
 {
     if(!check())
     {
@@ -212,6 +233,21 @@ void MainWindow::loadSettings()
     autoSave = settingsJson["Autosave"].toBool();
     wireColor = Qt::GlobalColor(settingsJson["Wire"].toInt());
     showAxes = settingsJson["Axes"].toBool();
+}
+
+void MainWindow::createUndoStack()
+{
+    m_undoStack = new QUndoStack(this);
+    m_undoAction = m_undoStack->createUndoAction(this, tr("&Undo"));
+    m_undoAction->setIcon(QIcon(":/Tools/src/Undo.png"));
+    m_undoAction->setShortcuts(QKeySequence::Undo);
+    m_redoAction = m_undoStack->createRedoAction(this, tr("&Redo"));
+    m_redoAction->setIcon(QIcon(":/Tools/src/Redo.png"));
+    m_redoAction->setShortcuts(QKeySequence::Redo);
+    connect(m_Scene, &GraphicsScene::itemMoved, this, &MainWindow::itemMoved);
+    connect(m_Scene, &GraphicsScene::itemNew, this, &MainWindow::itemNew);
+    connect(m_Scene, &GraphicsScene::itemErased, this, &MainWindow::itemErased);
+    connect(m_Scene, &GraphicsScene::allErased, this, &MainWindow::allErased);
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -506,14 +542,19 @@ void MainWindow::setToolBar()
     m_toolbar_operators = addToolBar(tr("Operators"));
     m_toolbar_tools = addToolBar(tr("Tools"));
 
-    QAction* actionMouse = m_toolbar_tools->addAction(QIcon(":/Tools/src/Mouse.png"), "Mouse");
-    connect(actionMouse, SIGNAL(triggered()),
-            this, SLOT(stopDrawingObject()));
+    QAction* actionMouse = m_toolbar_tools->addAction(QIcon(":/Tools/src/Mouse.png"), "Mouse (ESC)");
+    connect(actionMouse, SIGNAL(triggered()), this, SLOT(stopDrawingObject()));
+    m_toolbar_tools->addSeparator();
 
+    m_toolbar_tools->addAction(m_undoAction);
+    m_toolbar_tools->addAction(m_redoAction);
+
+    QAction* actionEraseAll = m_toolbar_tools->addAction(QIcon(":/Tools/src/EraseAll.png"), "Erase Everything");
+    connect(actionEraseAll, SIGNAL(triggered()), this, SLOT (eraseAll()));
     m_toolbar_tools->addSeparator();
 
     // APPROACH 1
-    // mapping signal to slot with non-vod arguments
+    // mapping signal to slot with non-void arguments
     QSignalMapper* signalMapper = new QSignalMapper(this);
 
     QAction* actionZoomIn = m_toolbar_tools->addAction(QIcon(":/Tools/src/ZoomIn.png"), "Zoom In");
@@ -529,19 +570,9 @@ void MainWindow::setToolBar()
     signalMapper->setMapping(actionZoomOut, -1);
 
     connect(signalMapper, &QSignalMapper::mappedInt, this, &MainWindow::zoom);
-    // APPROACH 1
-
-    m_toolbar_tools->addSeparator();
-
-    QAction* actionEraser = m_toolbar_tools->addAction(QIcon(":/Tools/src/Eraser.png"), "Eraser");
-    connect(actionEraser, SIGNAL(triggered()), this, SLOT (eraser()));
-
-    QAction* actionEraseAll = m_toolbar_tools->addAction(QIcon(":/Tools/src/EraseAll.png"), "Erase Everything");
-    connect(actionEraseAll, SIGNAL(triggered()), this, SLOT (eraseAll()));
 
     // APPROACH 2
-    // mapping signal to slot with non-vod arguments
-
+    // mapping signal to slot with non-void arguments
     QAction* action1 = m_toolbar_operators->addAction(QIcon(":/Operators/src/NOT.png"), "NOT");
     QAction* action2 = m_toolbar_operators->addAction(QIcon(":/Operators/src/AND.png"), "AND");
     QAction* action3 = m_toolbar_operators->addAction(QIcon(":/Operators/src/OR.png"),  "OR");
@@ -550,8 +581,8 @@ void MainWindow::setToolBar()
     QAction* action6 = m_toolbar_operators->addAction(QIcon(":/Operators/src/NOR.png"),  "NOR");
     QAction* action7 = m_toolbar_operators->addAction(QIcon(":/Operators/src/XNOR.png"), "XNOR");
     m_toolbar_operators->addSeparator();
-    QAction* action8 = m_toolbar_operators->addAction(QIcon(":/Operators/src/IN.png"), "IN");
-    QAction* action9 = m_toolbar_operators->addAction(QIcon(":/Operators/src/OUT.png"), "OUT");
+    QAction* action8 = m_toolbar_operators->addAction(QIcon(":/Labels/src/IN.png"), "IN");
+    QAction* action9 = m_toolbar_operators->addAction(QIcon(":/Labels/src/OUT.png"), "OUT");
 
     connect(action1, &QAction::triggered, this, [this] { setDrawingObject("NOT"); });
     connect(action2, &QAction::triggered, this, [this] { setDrawingObject("AND"); });
@@ -562,7 +593,6 @@ void MainWindow::setToolBar()
     connect(action7, &QAction::triggered, this, [this] { setDrawingObject("XNOR"); });
     connect(action8, &QAction::triggered, this, [this] { setDrawingObject("IN"); });
     connect(action9, &QAction::triggered, this, [this] { setDrawingObject("OUT"); });
-    // APPROACH 2
 
 }
 
@@ -581,16 +611,18 @@ void MainWindow::setMenuBar()
     connect(saveAction, SIGNAL(triggered()), this, SLOT(save()));
 
     QMenu* itemMenu = menuBar()->addMenu(tr("&Project"));
-    QAction* debugAction = itemMenu->addAction("Convert to Verilog");
-    connect(debugAction, SIGNAL(triggered()), this, SLOT(debug()));
+
+    itemMenu->addAction(m_undoAction);
+    itemMenu->addAction(m_redoAction);
+    itemMenu->addSeparator();
+
+    QAction* compileAction = itemMenu->addAction("Convert to Verilog");
+    connect(compileAction, SIGNAL(triggered()), this, SLOT(compile()));
 
     QAction* checkAction = itemMenu->addAction("Check");
     connect(checkAction, SIGNAL(triggered()), this, SLOT(check()));
-
     QMenu* settingsMenu = menuBar()->addMenu(tr("&Settings"));
-
     QMenu* prefereneMenu = settingsMenu->addMenu("&Preferences");
-
     autoSaveAction = prefereneMenu->addAction("Auto Save");
     autoSaveAction->setCheckable(true);
     autoSaveAction->setChecked(autoSave);
@@ -600,7 +632,6 @@ void MainWindow::setMenuBar()
     showAxesAction->setCheckable(true);
     showAxesAction->setChecked(showAxes);
     connect(showAxesAction, SIGNAL(triggered()), this, SLOT(setShowAxes()));
-
 
     QAction* zoomReset = settingsMenu->addAction("Reset Zoom Settings");
     connect(zoomReset, SIGNAL(triggered()), this, SLOT(zoom()));

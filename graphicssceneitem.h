@@ -8,7 +8,7 @@
 class SceneItem: public QGraphicsItemGroup
 {
 public:
-    enum TYPE{
+    enum TYPE {
         INPUT = UserType + 30,
         OUTPUT,
         NOT,

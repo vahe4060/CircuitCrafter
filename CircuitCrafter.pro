@@ -10,6 +10,7 @@ CONFIG += c++11
 
 SOURCES += \
     circuit.cpp \
+    commands.cpp \
     controller.cpp \
     edge.cpp \
     graphicslineitem.cpp \
@@ -27,6 +28,7 @@ SOURCES += \
 
 HEADERS += \
     circuit.h \
+    commands.h \
     controller.h \
     edge.h \
     experimental.h \

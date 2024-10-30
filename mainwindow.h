@@ -14,7 +14,8 @@
 #include "graphicsscene.h"
 #include "verilog_parser.h"
 #include "experimental.h"
-
+#include "commands.h"
+// #include <QPointF>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -41,8 +42,13 @@ public slots:
     void setUpdatedFlag();
     void setNotUpdatedFlag();
     void about();
-    void debug();
+    void compile();
     bool check();
+    // Command slots
+    void itemMoved(SceneItem *it, const QPointF &newPos);
+    void itemNew(SceneItem::TYPE t, const QPointF &pos);
+    void itemErased(SceneItem *it);
+    void allErased();
 
 public:
    // MainWindow(QWidget *parent = nullptr);
@@ -76,6 +82,10 @@ protected:
     GraphicsScene* m_Scene = nullptr;
     QGraphicsItem* m_Center = nullptr;
 
+    QAction *m_undoAction = nullptr;
+    QAction *m_redoAction = nullptr;
+    QUndoStack *m_undoStack = nullptr;
+
     QToolBar* m_toolbar_operators = nullptr;
     QToolBar* m_toolbar_tools = nullptr;
 
@@ -90,12 +100,13 @@ protected:
     void setToolBar();
     void setMenuBar();
     void loadSettings();
+    void createUndoStack();
 };
 
 #else
 
 
-class MainWindow : public QMainWindow // MVC-View
+class MainWindow : public QMainWindow // MVC-Controller
 {
     Q_OBJECT
     friend class Controller;
@@ -112,7 +123,7 @@ public slots:
     void setShowAxes();
     void newDocument();
     void about();
-    void debug();
+    void compile();
     bool check();
 
 public:

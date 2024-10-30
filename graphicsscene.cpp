@@ -64,6 +64,7 @@ void GraphicsScene::clear()
     {
         delete it;
     }
+    emit allErased();
 }
 
 void GraphicsScene::keyPressEvent(QKeyEvent* event)
@@ -87,16 +88,21 @@ void GraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent* event)
         else
             it = new Operator(type, event->scenePos().x(),event->scenePos().y(), MainWindow::instance()->Center());
         (void *)it;
+        emit itemNew(type, it->pos());
     }
     else if(erasing)
     {
         QGraphicsItem* it = itemAt(event->scenePos(), QTransform());
-        if(it)
+        if(it) {
             delete it->parentItem();
+            emit itemErased(static_cast<SceneItem *>(it));
+        }
     }
     else
     {
         QGraphicsScene::mousePressEvent((event));
     }
+    // TODO: item moved
+    // emit itemMoved();
 }
 

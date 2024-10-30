@@ -6,6 +6,7 @@
 
 class GraphicsScene: public QGraphicsScene
 {
+    Q_OBJECT
 public:
     GraphicsScene(QObject *parent = nullptr);
     GraphicsScene(const QRectF &sceneRect, QObject *parent = nullptr);
@@ -16,6 +17,12 @@ public:
     void setErasing(bool e);
     void loadAxes(bool load);
     void clear();
+
+signals:
+    void itemMoved(SceneItem *it, const QPointF &newPos);
+    void itemNew(SceneItem::TYPE t, const QPointF &pos);
+    void itemErased(SceneItem *it);
+    void allErased();
 
 protected:
     virtual void keyPressEvent(QKeyEvent *event);
