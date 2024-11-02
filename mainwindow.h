@@ -44,16 +44,10 @@ public slots:
     void about();
     void compile();
     bool check();
-    // Command slots
-    void itemMoved(SceneItem *it, const QPointF &newPos);
-    void itemNew(SceneItem::TYPE t, const QPointF &pos);
-    void itemErased(SceneItem *it);
-    void allErased();
 
 public:
    // MainWindow(QWidget *parent = nullptr);
    // ~MainWindow();
-
     static MainWindow* instance();
     int popUpDialog(const QString &name,
                            const QString &text,
@@ -82,10 +76,6 @@ protected:
     GraphicsScene* m_Scene = nullptr;
     QGraphicsItem* m_Center = nullptr;
 
-    QAction *m_undoAction = nullptr;
-    QAction *m_redoAction = nullptr;
-    QUndoStack *m_undoStack = nullptr;
-
     QToolBar* m_toolbar_operators = nullptr;
     QToolBar* m_toolbar_tools = nullptr;
 
@@ -100,7 +90,6 @@ protected:
     void setToolBar();
     void setMenuBar();
     void loadSettings();
-    void createUndoStack();
 };
 
 #else

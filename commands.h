@@ -10,10 +10,10 @@ class EraseItemCommand : public QUndoCommand
 public:
     EraseItemCommand() {}
     void undo() override {
-        qDebug() << "Undoing \n";
+        qDebug() << "Undoing erase item\n";
     };
     void redo() override {
-        qDebug() << "Redoing \n";
+        qDebug() << "Redoing erase item\n";
     };
 };
 
@@ -23,10 +23,10 @@ class EraseAllCommand : public QUndoCommand
 public:
     EraseAllCommand() {}
     void undo() override {
-        qDebug() << "Undoing \n";
+        qDebug() << "Undoing erase all\n";
     }
     void redo() override {
-        qDebug() << "Redoing \n";
+        qDebug() << "Redoing erase all\n";
     }
 };
 
@@ -37,10 +37,10 @@ class NewItemCommand : public QUndoCommand
 public:
     NewItemCommand() {}
     void undo() override {
-        qDebug() << "Undoing \n";
+        qDebug() << "Undoing new item\n";
     }
     void redo() override {
-        qDebug() << "Redoing \n";
+        qDebug() << "Redoing new item\n";
     }
 };
 
@@ -50,10 +50,10 @@ class MoveItemCommand : public QUndoCommand
 public:
     MoveItemCommand() {}
     void undo() override {
-        qDebug() << "Undoing Moveitem\n";
+        qDebug() << "Undoing move item\n";
     }
     void redo() override {
-        qDebug() << "Redoing Moveitem\n";
+        qDebug() << "Redoing move item\n";
     }
 };
 

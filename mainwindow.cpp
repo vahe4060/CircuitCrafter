@@ -43,7 +43,6 @@ MainWindow::MainWindow(QWidget *parent)
     widget->setLayout(layout);
     setCentralWidget(widget);
 
-    createUndoStack();
     loadSettings();
     setToolBar();
     setMenuBar();
@@ -146,26 +145,6 @@ bool MainWindow::check()
     return true;
 }
 
-void MainWindow::itemMoved(SceneItem *it, const QPointF &newPos)
-{
-    m_undoStack->push(new MoveItemCommand);
-}
-
-void MainWindow::itemNew(SceneItem::TYPE t, const QPointF &pos)
-{
-    m_undoStack->push(new NewItemCommand);
-}
-
-void MainWindow::itemErased(SceneItem *it)
-{
-    m_undoStack->push(new EraseItemCommand);
-}
-
-void MainWindow::allErased()
-{
-    m_undoStack->push(new EraseAllCommand);
-}
-
 void MainWindow::compile()
 {
     if(!check())
@@ -233,21 +212,6 @@ void MainWindow::loadSettings()
     autoSave = settingsJson["Autosave"].toBool();
     wireColor = Qt::GlobalColor(settingsJson["Wire"].toInt());
     showAxes = settingsJson["Axes"].toBool();
-}
-
-void MainWindow::createUndoStack()
-{
-    m_undoStack = new QUndoStack(this);
-    m_undoAction = m_undoStack->createUndoAction(this, tr("&Undo"));
-    m_undoAction->setIcon(QIcon(":/Tools/src/Undo.png"));
-    m_undoAction->setShortcuts(QKeySequence::Undo);
-    m_redoAction = m_undoStack->createRedoAction(this, tr("&Redo"));
-    m_redoAction->setIcon(QIcon(":/Tools/src/Redo.png"));
-    m_redoAction->setShortcuts(QKeySequence::Redo);
-    connect(m_Scene, &GraphicsScene::itemMoved, this, &MainWindow::itemMoved);
-    connect(m_Scene, &GraphicsScene::itemNew, this, &MainWindow::itemNew);
-    connect(m_Scene, &GraphicsScene::itemErased, this, &MainWindow::itemErased);
-    connect(m_Scene, &GraphicsScene::allErased, this, &MainWindow::allErased);
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -546,8 +510,8 @@ void MainWindow::setToolBar()
     connect(actionMouse, SIGNAL(triggered()), this, SLOT(stopDrawingObject()));
     m_toolbar_tools->addSeparator();
 
-    m_toolbar_tools->addAction(m_undoAction);
-    m_toolbar_tools->addAction(m_redoAction);
+    m_toolbar_tools->addAction(m_Scene->getUndoAction());
+    m_toolbar_tools->addAction(m_Scene->getRedoAction());
 
     QAction* actionEraseAll = m_toolbar_tools->addAction(QIcon(":/Tools/src/EraseAll.png"), "Erase Everything");
     connect(actionEraseAll, SIGNAL(triggered()), this, SLOT (eraseAll()));
@@ -612,8 +576,8 @@ void MainWindow::setMenuBar()
 
     QMenu* itemMenu = menuBar()->addMenu(tr("&Project"));
 
-    itemMenu->addAction(m_undoAction);
-    itemMenu->addAction(m_redoAction);
+    itemMenu->addAction(m_Scene->getUndoAction());
+    itemMenu->addAction(m_Scene->getRedoAction());
     itemMenu->addSeparator();
 
     QAction* compileAction = itemMenu->addAction("Convert to Verilog");

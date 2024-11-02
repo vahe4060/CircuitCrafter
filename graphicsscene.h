@@ -3,6 +3,8 @@
 #include <QtWidgets>
 #include "labels.h"
 #include "operators.h"
+#include <QGraphicsScene>
+#include <QObject>
 
 class GraphicsScene: public QGraphicsScene
 {
@@ -17,12 +19,14 @@ public:
     void setErasing(bool e);
     void loadAxes(bool load);
     void clear();
+    void createUndoStack();
+    QAction *getUndoAction() { return m_undoAction; }
+    QAction *getRedoAction() { return m_redoAction; }
 
-signals:
-    void itemMoved(SceneItem *it, const QPointF &newPos);
-    void itemNew(SceneItem::TYPE t, const QPointF &pos);
-    void itemErased(SceneItem *it);
-    void allErased();
+public slots:
+    void onItemMove(SceneItem *it, const QPointF &newPos);
+    void onItemNew(SceneItem::TYPE t, const QPointF &pos);
+    void onItemErase(SceneItem *it);
 
 protected:
     virtual void keyPressEvent(QKeyEvent *event);
@@ -31,9 +35,11 @@ protected:
     bool drawing = false;
     bool erasing = false;
     SceneItem::TYPE type;
-
     QGraphicsItem* m_AxisX = nullptr;
     QGraphicsItem* m_AxisY = nullptr;
+    QAction *m_undoAction = nullptr;
+    QAction *m_redoAction = nullptr;
+    QUndoStack *m_undoStack = nullptr;
 };
 
 #endif // GRAPHICSSCENE_H

@@ -4,9 +4,13 @@
 #include "input_node.h"
 #include "output_node.h"
 #include "graphicspixmapitem.h"
+#include <QPointF>
+#include <QObject>
+#include <QGraphicsItemGroup>
 
-class SceneItem: public QGraphicsItemGroup
+class SceneItem: public QObject, public QGraphicsItemGroup
 {
+    Q_OBJECT
 public:
     enum TYPE {
         INPUT = UserType + 30,
@@ -38,6 +42,11 @@ public:
     QVector<SceneItem*> outputs() const;
     bool isDanglingInput() const;
     bool isDanglingOutput() const;
+
+signals:
+    void moved(SceneItem *it, const QPointF &newPos);
+    void created(SceneItem::TYPE t, const QPointF &pos);
+    void erased(SceneItem *it);
 
 protected:
     QVector<Input_Node*> m_inputs;

@@ -13,7 +13,6 @@ QMap<SceneItem::TYPE, QString> SceneItem::types = {
     {SceneItem::TYPE::OUTPUT, "OUT"}
 };
 
-
 SceneItem::SceneItem(TYPE t, int x, int y, QGraphicsItem* parent) : QGraphicsItemGroup(parent)
    , m_t(t)
    , m_id(MainWindow::instance()->NextID())
@@ -23,6 +22,7 @@ SceneItem::SceneItem(TYPE t, int x, int y, QGraphicsItem* parent) : QGraphicsIte
 
     MainWindow::instance()->setUpdatedFlag();
     //m_pixmap = new GraphicsPixmapItem(QPixmap(":/LogicOperators/src/" + SceneItem::types[t] + ".png"), this);
+    emit created(t, QPointF(x, y));
 }
 
 SceneItem::SceneItem(const int id, TYPE t, int x, int y, QGraphicsItem* parent) : QGraphicsItemGroup(parent)
@@ -33,6 +33,7 @@ SceneItem::SceneItem(const int id, TYPE t, int x, int y, QGraphicsItem* parent) 
     setHandlesChildEvents(false);
 
     MainWindow::instance()->setUpdatedFlag();
+    emit created(t, QPointF(x, y));
 }
 
 SceneItem::~SceneItem()
@@ -49,6 +50,7 @@ SceneItem::~SceneItem()
     }
 
     MainWindow::instance()->setUpdatedFlag();
+    emit erased(this);
 }
 
 void SceneItem::setSelected(bool state)
@@ -102,6 +104,7 @@ void SceneItem::setPos(QPointF pos)
     }
 
     MainWindow::instance()->setUpdatedFlag();
+    emit moved(this, pos);
 }
 
 bool SceneItem::isDanglingInput() const

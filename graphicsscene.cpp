@@ -3,16 +3,46 @@
 
 GraphicsScene::GraphicsScene(QObject *parent) : QGraphicsScene(parent)
 {
-
+    createUndoStack();
 }
 GraphicsScene::GraphicsScene(const QRectF &sceneRect, QObject *parent): QGraphicsScene(sceneRect, parent)
 {
-
+    createUndoStack();
 }
 
 GraphicsScene::GraphicsScene(qreal x, qreal y, qreal width, qreal height, QObject *parent): QGraphicsScene(x, y, width, height, parent)
 {
+    createUndoStack();
+}
 
+void GraphicsScene::createUndoStack()
+{
+    m_undoStack = new QUndoStack(this);
+    m_undoAction = m_undoStack->createUndoAction(this, tr("&Undo"));
+    m_undoAction->setIcon(QIcon(":/Tools/src/Undo.png"));
+    m_undoAction->setShortcuts(QKeySequence::Undo);
+    m_redoAction = m_undoStack->createRedoAction(this, tr("&Redo"));
+    m_redoAction->setIcon(QIcon(":/Tools/src/Redo.png"));
+    m_redoAction->setShortcuts(QKeySequence::Redo);
+    // connect(m_Scene, &GraphicsScene::itemMoved, this, &MainWindow::itemMoved);
+    // connect(m_Scene, &GraphicsScene::itemNew, this, &MainWindow::itemNew);
+    // connect(m_Scene, &GraphicsScene::itemErased, this, &MainWindow::itemErased);
+    // connect(m_Scene, &GraphicsScene::allErased, this, &MainWindow::allErased);
+}
+
+void GraphicsScene::onItemMove(SceneItem *it, const QPointF &newPos)
+{
+    m_undoStack->push(new MoveItemCommand);
+}
+
+void GraphicsScene::onItemNew(SceneItem::TYPE t, const QPointF &pos)
+{
+    m_undoStack->push(new NewItemCommand);
+}
+
+void GraphicsScene::onItemErase(SceneItem *it)
+{
+    m_undoStack->push(new EraseItemCommand);
 }
 
 void GraphicsScene::loadAxes(bool show)
@@ -64,7 +94,6 @@ void GraphicsScene::clear()
     {
         delete it;
     }
-    emit allErased();
 }
 
 void GraphicsScene::keyPressEvent(QKeyEvent* event)
@@ -87,22 +116,20 @@ void GraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent* event)
             it = new Label(type, event->scenePos().x(), event->scenePos().y(), MainWindow::instance()->Center());
         else
             it = new Operator(type, event->scenePos().x(),event->scenePos().y(), MainWindow::instance()->Center());
-        (void *)it;
-        emit itemNew(type, it->pos());
+        // connect(it, &SceneItem::created, this, &GraphicsScene::onItemNew);
+        onItemNew(type, event->scenePos());
+        connect(it, &SceneItem::moved, this, &GraphicsScene::onItemMove);
+        connect(it, &SceneItem::erased, this, &GraphicsScene::onItemErase);
     }
     else if(erasing)
     {
         QGraphicsItem* it = itemAt(event->scenePos(), QTransform());
         if(it) {
             delete it->parentItem();
-            emit itemErased(static_cast<SceneItem *>(it));
         }
     }
     else
     {
         QGraphicsScene::mousePressEvent((event));
     }
-    // TODO: item moved
-    // emit itemMoved();
 }
-
