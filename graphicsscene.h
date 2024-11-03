@@ -22,6 +22,12 @@ public:
     void createUndoStack();
     QAction *getUndoAction() { return m_undoAction; }
     QAction *getRedoAction() { return m_redoAction; }
+    QGraphicsItem* Center() const { return m_Center; }
+
+signals:
+    void itemMoved(SceneItem *it, const QPointF &newPos);
+    void itemCreated(SceneItem::TYPE t, const QPointF &pos);
+    void itemErased(SceneItem *it);
 
 public slots:
     void onItemMove(SceneItem *it, const QPointF &newPos);
@@ -31,6 +37,7 @@ public slots:
 protected:
     virtual void keyPressEvent(QKeyEvent *event);
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
+    virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
 
     bool drawing = false;
     bool erasing = false;
@@ -40,6 +47,7 @@ protected:
     QAction *m_undoAction = nullptr;
     QAction *m_redoAction = nullptr;
     QUndoStack *m_undoStack = nullptr;
+    QGraphicsItem* m_Center = nullptr;
 };
 
 #endif // GRAPHICSSCENE_H

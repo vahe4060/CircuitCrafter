@@ -24,10 +24,9 @@ void GraphicsScene::createUndoStack()
     m_redoAction = m_undoStack->createRedoAction(this, tr("&Redo"));
     m_redoAction->setIcon(QIcon(":/Tools/src/Redo.png"));
     m_redoAction->setShortcuts(QKeySequence::Redo);
-    // connect(m_Scene, &GraphicsScene::itemMoved, this, &MainWindow::itemMoved);
-    // connect(m_Scene, &GraphicsScene::itemNew, this, &MainWindow::itemNew);
-    // connect(m_Scene, &GraphicsScene::itemErased, this, &MainWindow::itemErased);
-    // connect(m_Scene, &GraphicsScene::allErased, this, &MainWindow::allErased);
+    connect(this, &GraphicsScene::itemMoved, this, &GraphicsScene::onItemMove);
+    connect(this, &GraphicsScene::itemCreated, this, &GraphicsScene::onItemNew);
+    connect(this, &GraphicsScene::itemErased, this, &GraphicsScene::onItemErase);
 }
 
 void GraphicsScene::onItemMove(SceneItem *it, const QPointF &newPos)
@@ -116,20 +115,27 @@ void GraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent* event)
             it = new Label(type, event->scenePos().x(), event->scenePos().y(), MainWindow::instance()->Center());
         else
             it = new Operator(type, event->scenePos().x(),event->scenePos().y(), MainWindow::instance()->Center());
-        // connect(it, &SceneItem::created, this, &GraphicsScene::onItemNew);
-        onItemNew(type, event->scenePos());
-        connect(it, &SceneItem::moved, this, &GraphicsScene::onItemMove);
-        connect(it, &SceneItem::erased, this, &GraphicsScene::onItemErase);
+        emit itemCreated(type, event->scenePos());
     }
     else if(erasing)
     {
         QGraphicsItem* it = itemAt(event->scenePos(), QTransform());
         if(it) {
+            emit itemErased(static_cast<SceneItem *>(it));
             delete it->parentItem();
         }
     }
     else
     {
+        if (itemAt(event->scenePos(), QTransform()))
+            qDebug() << "Something under mouse";
+
         QGraphicsScene::mousePressEvent((event));
     }
+}
+
+void GraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+{
+    qDebug() << "Released";
+    QGraphicsScene::mouseReleaseEvent(event);
 }

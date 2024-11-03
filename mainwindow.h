@@ -27,7 +27,7 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 public slots:
-    void setDrawingObject(QString itemtype);
+    void setDrawingObject(SceneItem::TYPE t);
     void stopDrawingObject();
     void zoom(int zoomin = 0);
     void save();
@@ -46,8 +46,6 @@ public slots:
     bool check();
 
 public:
-   // MainWindow(QWidget *parent = nullptr);
-   // ~MainWindow();
     static MainWindow* instance();
     int popUpDialog(const QString &name,
                            const QString &text,
@@ -55,11 +53,9 @@ public:
                            QMessageBox::StandardButtons buttons
                            );
     ~MainWindow();
-
     MainWindow& operator=(const MainWindow&) = delete;
     MainWindow(const MainWindow&) = delete;
 
-    int NextID() { return ++m_objectCount; }
     QGraphicsView* View() const { return m_View; }
     GraphicsScene* Scene() const { return m_Scene; }
     QGraphicsItem* Center() const { return m_Center; }
@@ -71,7 +67,6 @@ protected:
     static bool showAxes;
     static Qt::GlobalColor wireColor;
 
-    int m_objectCount = 0;
     QGraphicsView* m_View = nullptr;
     GraphicsScene* m_Scene = nullptr;
     QGraphicsItem* m_Center = nullptr;

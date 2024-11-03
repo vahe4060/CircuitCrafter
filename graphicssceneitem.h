@@ -8,9 +8,8 @@
 #include <QObject>
 #include <QGraphicsItemGroup>
 
-class SceneItem: public QObject, public QGraphicsItemGroup
+class SceneItem: public QGraphicsItemGroup
 {
-    Q_OBJECT
 public:
     enum TYPE {
         INPUT = UserType + 30,
@@ -43,19 +42,14 @@ public:
     bool isDanglingInput() const;
     bool isDanglingOutput() const;
 
-signals:
-    void moved(SceneItem *it, const QPointF &newPos);
-    void created(SceneItem::TYPE t, const QPointF &pos);
-    void erased(SceneItem *it);
-
 protected:
+    static int id_count;
+
     QVector<Input_Node*> m_inputs;
     QVector<Output_Node*> m_outputs;
     GraphicsPixmapItem* m_pixmap = nullptr;
     TYPE m_t;
     const int m_id;
-
-    //static QMap<TYPE, QString> types;
 };
 
 #endif // LOGIC_OPERATOR_H

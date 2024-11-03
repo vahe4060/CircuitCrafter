@@ -276,32 +276,8 @@ void MainWindow::resetSettings()
     }
 }
 
-void MainWindow::setDrawingObject(QString itemname)
+void MainWindow::setDrawingObject(SceneItem::TYPE t)
 {
-    SceneItem::TYPE t;
-    if(itemname == "NOT")
-        t =SceneItem::TYPE::NOT;
-    else if(itemname == "AND")
-        t = SceneItem::TYPE::AND;
-    else if(itemname == "OR")
-        t = SceneItem::TYPE::OR;
-    else if(itemname == "XOR")
-        t = SceneItem::TYPE::XOR;
-    else if(itemname == "NAND")
-        t = SceneItem::TYPE::NAND;
-    else if(itemname == "NOR")
-        t = SceneItem::TYPE::NOR;
-    else if(itemname == "XNOR")
-        t = SceneItem::TYPE::XNOR;
-    else if(itemname == "IN")
-        t = SceneItem::TYPE::INPUT;
-    else if(itemname == "OUT")
-        t = SceneItem::TYPE::OUTPUT;
-    else if(itemname == "NOT")
-        t = SceneItem::TYPE::NOT;
-    else
-        return;
-
     m_Scene->setCurrent(t);
 
     if(t == SceneItem::INPUT || t == SceneItem::OUTPUT)
@@ -457,7 +433,6 @@ void MainWindow::load()
         {
             new Operator(id, t, x, y, m_Center);
         }
-        m_objectCount = (m_objectCount>id)?m_objectCount:id;
     }
     for(QJsonValueRef i: edges)
     {
@@ -534,30 +509,28 @@ void MainWindow::setToolBar()
     signalMapper->setMapping(actionZoomOut, -1);
 
     connect(signalMapper, &QSignalMapper::mappedInt, this, &MainWindow::zoom);
-
     // APPROACH 2
     // mapping signal to slot with non-void arguments
-    QAction* action1 = m_toolbar_operators->addAction(QIcon(":/Operators/src/NOT.png"), "NOT");
-    QAction* action2 = m_toolbar_operators->addAction(QIcon(":/Operators/src/AND.png"), "AND");
-    QAction* action3 = m_toolbar_operators->addAction(QIcon(":/Operators/src/OR.png"),  "OR");
-    QAction* action4 = m_toolbar_operators->addAction(QIcon(":/Operators/src/XOR.png"), "XOR");
-    QAction* action5 = m_toolbar_operators->addAction(QIcon(":/Operators/src/NAND.png"), "NAND");
-    QAction* action6 = m_toolbar_operators->addAction(QIcon(":/Operators/src/NOR.png"),  "NOR");
-    QAction* action7 = m_toolbar_operators->addAction(QIcon(":/Operators/src/XNOR.png"), "XNOR");
+    QAction* item_not = m_toolbar_operators->addAction(QIcon(":/Operators/src/NOT.png"), "NOT");
+    QAction* item_and = m_toolbar_operators->addAction(QIcon(":/Operators/src/AND.png"), "AND");
+    QAction* item_or = m_toolbar_operators->addAction(QIcon(":/Operators/src/OR.png"),  "OR");
+    QAction* item_xor = m_toolbar_operators->addAction(QIcon(":/Operators/src/XOR.png"), "XOR");
+    QAction* item_nand = m_toolbar_operators->addAction(QIcon(":/Operators/src/NAND.png"), "NAND");
+    QAction* item_nor = m_toolbar_operators->addAction(QIcon(":/Operators/src/NOR.png"),  "NOR");
+    QAction* item_xnor = m_toolbar_operators->addAction(QIcon(":/Operators/src/XNOR.png"), "XNOR");
     m_toolbar_operators->addSeparator();
-    QAction* action8 = m_toolbar_operators->addAction(QIcon(":/Labels/src/IN.png"), "IN");
-    QAction* action9 = m_toolbar_operators->addAction(QIcon(":/Labels/src/OUT.png"), "OUT");
+    QAction* item_in = m_toolbar_operators->addAction(QIcon(":/Labels/src/IN.png"), "IN");
+    QAction* item_out = m_toolbar_operators->addAction(QIcon(":/Labels/src/OUT.png"), "OUT");
 
-    connect(action1, &QAction::triggered, this, [this] { setDrawingObject("NOT"); });
-    connect(action2, &QAction::triggered, this, [this] { setDrawingObject("AND"); });
-    connect(action3, &QAction::triggered, this, [this] { setDrawingObject("OR"); });
-    connect(action4, &QAction::triggered, this, [this] { setDrawingObject("XOR"); });
-    connect(action5, &QAction::triggered, this, [this] { setDrawingObject("NAND"); });
-    connect(action6, &QAction::triggered, this, [this] { setDrawingObject("NOR"); });
-    connect(action7, &QAction::triggered, this, [this] { setDrawingObject("XNOR"); });
-    connect(action8, &QAction::triggered, this, [this] { setDrawingObject("IN"); });
-    connect(action9, &QAction::triggered, this, [this] { setDrawingObject("OUT"); });
-
+    connect(item_not, &QAction::triggered, this, [this] { setDrawingObject(SceneItem::TYPE::NOT); });
+    connect(item_and, &QAction::triggered, this, [this] { setDrawingObject(SceneItem::TYPE::AND); });
+    connect(item_or, &QAction::triggered, this, [this] { setDrawingObject(SceneItem::TYPE::OR); });
+    connect(item_xor, &QAction::triggered, this, [this] { setDrawingObject(SceneItem::TYPE::XOR); });
+    connect(item_nand, &QAction::triggered, this, [this] { setDrawingObject(SceneItem::TYPE::NAND); });
+    connect(item_nor, &QAction::triggered, this, [this] { setDrawingObject(SceneItem::TYPE::NOR); });
+    connect(item_xnor, &QAction::triggered, this, [this] { setDrawingObject(SceneItem::TYPE::XNOR); });
+    connect(item_in, &QAction::triggered, this, [this] { setDrawingObject(SceneItem::TYPE::INPUT); });
+    connect(item_out, &QAction::triggered, this, [this] { setDrawingObject(SceneItem::TYPE::OUTPUT); });
 }
 
 void MainWindow::setMenuBar()
