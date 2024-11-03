@@ -33,10 +33,7 @@ MainWindow::MainWindow(QWidget *parent)
     QWidget *widget = new QWidget;
     QVBoxLayout* layout = new QVBoxLayout;
 
-    m_Center = (QGraphicsItem*)(new QGraphicsEllipseItem(0,0,1,1, nullptr));
-    m_Scene = new GraphicsScene;
-    m_Scene->setSceneRect(QRectF(-2500, -2500, 5000, 5000));
-    m_Scene->addItem(m_Center);
+    m_Scene = new GraphicsScene(QRectF(-2500, -2500, 5000, 5000), this);
     m_View = new QGraphicsView(m_Scene);
 
     layout->addWidget(m_View);
@@ -53,7 +50,6 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-    delete m_Center;
     delete m_Scene;
     delete m_View;
     delete m_toolbar_operators;
@@ -74,7 +70,7 @@ bool MainWindow::check()
 {
     save();
 
-    QList<QGraphicsItem*> items = m_Center->childItems();
+    QList<QGraphicsItem*> items = GraphicsScene::centralItem()->childItems();
     for(int i=items.size() - 1; i >= 0; i--)
         if(items[i]->type() == Edge::TYPE::EDGE)
         {
@@ -152,7 +148,7 @@ void MainWindow::compile()
         return;
     }
 
-    QList<QGraphicsItem*> items = m_Center->childItems();
+    QList<QGraphicsItem*> items = GraphicsScene::centralItem()->childItems();
 
     for(int i=items.size() - 1; i >= 0; i--)
         if(items[i]->type() == Edge::TYPE::EDGE)
@@ -231,7 +227,6 @@ void MainWindow::closeEvent(QCloseEvent* event)
     if(autoSave)
         if(updated)
         {
-            // QMessageBox::StandardButton reply;
             auto reply = popUpDialog("Editor", "Save changes before exit?",
                                      QMessageBox::Question,
                                      QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
@@ -269,7 +264,7 @@ void MainWindow::resetSettings()
 
     wireColor = Qt::black;
     QPen pen(QBrush(wireColor), 2);
-    for(QGraphicsItem* it:m_Center->childItems())
+    for(QGraphicsItem* it:GraphicsScene::centralItem()->childItems())
     {
         if(it->type() == Edge::TYPE::EDGE)
             static_cast<Edge*>(it)->highlight(pen);
@@ -312,7 +307,6 @@ void MainWindow::eraser()
 
 void MainWindow::eraseAll()
 {
-    // QMessageBox::StandardButton reply;
     auto reply = popUpDialog("Editor", "Are you sure you want to erase everything?",
                              QMessageBox::Question,
                              QMessageBox::Yes|QMessageBox::No);
@@ -331,7 +325,7 @@ void MainWindow::save()
         currentPath = fileName;
     }
 
-    QList<QGraphicsItem*> items = m_Center->childItems();
+    QList<QGraphicsItem*> items = GraphicsScene::centralItem()->childItems();
     QJsonArray levelObjects, levelEdges;
 
     for(QGraphicsItem* i: items)
@@ -426,13 +420,9 @@ void MainWindow::load()
         int y = it["pos"].toObject()["y"].toDouble();
 
         if(t == SceneItem::TYPE::INPUT || t == SceneItem::TYPE::OUTPUT)
-        {
-            new Label(id, t, x, y, m_Center);
-        }
+            new Label(id, t, x, y, GraphicsScene::centralItem());
         else
-        {
-            new Operator(id, t, x, y, m_Center);
-        }
+            new Operator(id, t, x, y, GraphicsScene::centralItem());
     }
     for(QJsonValueRef i: edges)
     {

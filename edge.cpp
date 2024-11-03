@@ -1,7 +1,7 @@
 #include "edge.h"
 #include "mainwindow.h"
 
-Edge::Edge(Node *left, Node *right) : QGraphicsItemGroup(MainWindow::instance()->Center())
+Edge::Edge(Node *left, Node *right) : QGraphicsItemGroup(GraphicsScene::centralItem())
   , m_left(left)
   , m_right(right)
 {

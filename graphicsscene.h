@@ -12,7 +12,6 @@ class GraphicsScene: public QGraphicsScene
 public:
     GraphicsScene(QObject *parent = nullptr);
     GraphicsScene(const QRectF &sceneRect, QObject *parent = nullptr);
-    GraphicsScene(qreal x, qreal y, qreal width, qreal height, QObject *parent = nullptr);
 
     void setCurrent(SceneItem::TYPE t);
     void setDrawing(bool d);
@@ -22,7 +21,7 @@ public:
     void createUndoStack();
     QAction *getUndoAction() { return m_undoAction; }
     QAction *getRedoAction() { return m_redoAction; }
-    QGraphicsItem* Center() const { return m_Center; }
+    static QGraphicsItem *centralItem();
 
 signals:
     void itemMoved(SceneItem *it, const QPointF &newPos);
@@ -47,7 +46,8 @@ protected:
     QAction *m_undoAction = nullptr;
     QAction *m_redoAction = nullptr;
     QUndoStack *m_undoStack = nullptr;
-    QGraphicsItem* m_Center = nullptr;
+
+    static QGraphicsEllipseItem central_item;
 };
 
 #endif // GRAPHICSSCENE_H

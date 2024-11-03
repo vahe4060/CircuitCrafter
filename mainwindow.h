@@ -58,7 +58,6 @@ public:
 
     QGraphicsView* View() const { return m_View; }
     GraphicsScene* Scene() const { return m_Scene; }
-    QGraphicsItem* Center() const { return m_Center; }
     static Qt::GlobalColor WireColor();
 
 protected:
@@ -69,7 +68,6 @@ protected:
 
     QGraphicsView* m_View = nullptr;
     GraphicsScene* m_Scene = nullptr;
-    QGraphicsItem* m_Center = nullptr;
 
     QToolBar* m_toolbar_operators = nullptr;
     QToolBar* m_toolbar_tools = nullptr;

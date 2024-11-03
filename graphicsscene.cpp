@@ -1,17 +1,22 @@
 #include "graphicsscene.h"
 #include "mainwindow.h"
 
+QGraphicsEllipseItem GraphicsScene::central_item = QGraphicsEllipseItem(0,0,1,1, nullptr);
+
+QGraphicsItem *GraphicsScene::centralItem()
+{
+    return &central_item;
+}
+
 GraphicsScene::GraphicsScene(QObject *parent) : QGraphicsScene(parent)
 {
-    createUndoStack();
-}
-GraphicsScene::GraphicsScene(const QRectF &sceneRect, QObject *parent): QGraphicsScene(sceneRect, parent)
-{
+    addItem(&GraphicsScene::central_item);
     createUndoStack();
 }
 
-GraphicsScene::GraphicsScene(qreal x, qreal y, qreal width, qreal height, QObject *parent): QGraphicsScene(x, y, width, height, parent)
+GraphicsScene::GraphicsScene(const QRectF &sceneRect, QObject *parent): QGraphicsScene(sceneRect, parent)
 {
+    addItem(&GraphicsScene::central_item);
     createUndoStack();
 }
 
@@ -84,12 +89,12 @@ void GraphicsScene::setErasing(bool e)
 void GraphicsScene::clear()
 {
     // firstly delete Edges, then the operators/labels
-    for(QGraphicsItem* it: MainWindow::instance()->Center()->childItems())
+    for(QGraphicsItem* it: GraphicsScene::centralItem()->childItems())
     {
         if(it->type() == Edge::TYPE::EDGE)
             delete it;
     }
-    for(QGraphicsItem* it: MainWindow::instance()->Center()->childItems())
+    for(QGraphicsItem* it: GraphicsScene::centralItem()->childItems())
     {
         delete it;
     }
@@ -112,9 +117,10 @@ void GraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent* event)
     {
         SceneItem* it;
         if(type == SceneItem::INPUT || type == SceneItem::OUTPUT)
-            it = new Label(type, event->scenePos().x(), event->scenePos().y(), MainWindow::instance()->Center());
+            it = new Label(type, event->scenePos().x(), event->scenePos().y(), GraphicsScene::centralItem());
         else
-            it = new Operator(type, event->scenePos().x(),event->scenePos().y(), MainWindow::instance()->Center());
+            it = new Operator(type, event->scenePos().x(),event->scenePos().y(), GraphicsScene::centralItem());
+        // addIten(it);
         emit itemCreated(type, event->scenePos());
     }
     else if(erasing)
