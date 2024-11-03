@@ -12,12 +12,16 @@ Simply open the project in Qt Creator and build with QMake.
 
 1. Migrate to Qt6 ✅ 
 2. Refactor to meet a design pattern (MVC) 
-3. Fix leaks (Valgrind)
+3. Fix any exiting leaks (Valgrind)
 4. Add undo/redo stack
-5. Add mouse navigation
+5. Implement mouse navigation and multiple item selection
 6. Add RMBC menu on SceneItem (delete, check)
 7. Keep toolbar positions in settings 
 8. Add tooltip for SceneItem
+9. Add "save", "save as", "close" button/file menu options
+10. Implement SceneItem naming
+11. Implement drawing of dynamic number of edges
+12. Implement white/black background themes
 
 ### Nice to Have Enhancements
 
@@ -25,7 +29,8 @@ Simply open the project in Qt Creator and build with QMake.
 * implement triggers (D, JK, T, SR)
 * implement possibility for custom operators/modules
 * optimize schematic parsing to a non-JSON format
-* (Dream) layout generation
+* truth table generation for scheme
+* layout generation
 
 ## Demo
 
