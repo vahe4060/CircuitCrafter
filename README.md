@@ -13,7 +13,7 @@ Simply open the project in Qt Creator and build with QMake.
 1. Migrate to Qt6 ✅ 
 2. Refactor to meet a design pattern (MVC) 
 3. Fix any exiting leaks (Valgrind)
-4. Add undo/redo stack
+4. Add undo/redo stack (new item ✅, delete item, move, new edge, clear scene)
 5. Implement mouse navigation and multiple item selection
 6. Add RMBC menu on SceneItem (delete, check)
 7. Keep toolbar positions in settings 

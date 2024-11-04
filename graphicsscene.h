@@ -46,6 +46,7 @@ protected:
     QAction *m_undoAction = nullptr;
     QAction *m_redoAction = nullptr;
     QUndoStack *m_undoStack = nullptr;
+    QGraphicsItem *m_activeItem = nullptr;
 
     static QGraphicsEllipseItem central_item;
 };

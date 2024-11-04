@@ -30,6 +30,8 @@ public:
     virtual ~SceneItem();
 
     void setSelected(bool state);
+    // virtual void disable(); // TODO
+    // virtual void enable(); // TODO
     virtual void highlight(QPen& pen);
     virtual void setPos(QPointF pos);
     virtual int type() const override { return m_t; }
@@ -50,6 +52,9 @@ protected:
     GraphicsPixmapItem* m_pixmap = nullptr;
     TYPE m_t;
     const int m_id;
+
+    friend class EraseItemCommand;
+    friend class NewItemCommand;
 };
 
 #endif // LOGIC_OPERATOR_H

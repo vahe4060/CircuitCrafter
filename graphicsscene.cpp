@@ -36,17 +36,17 @@ void GraphicsScene::createUndoStack()
 
 void GraphicsScene::onItemMove(SceneItem *it, const QPointF &newPos)
 {
-    m_undoStack->push(new MoveItemCommand);
+    m_undoStack->push(new MoveItemCommand(it, newPos));
 }
 
 void GraphicsScene::onItemNew(SceneItem::TYPE t, const QPointF &pos)
 {
-    m_undoStack->push(new NewItemCommand);
+    m_undoStack->push(new NewItemCommand(t, pos));
 }
 
 void GraphicsScene::onItemErase(SceneItem *it)
 {
-    m_undoStack->push(new EraseItemCommand);
+    m_undoStack->push(new EraseItemCommand(it));
 }
 
 void GraphicsScene::loadAxes(bool show)
@@ -108,40 +108,26 @@ void GraphicsScene::keyPressEvent(QKeyEvent* event)
         setErasing(false);
         MainWindow::instance()->View()->setCursor(QCursor());
     }
+    if(event->key() == Qt::Key_Delete && m_activeItem)
+    {
+        emit itemErased(static_cast<SceneItem*>(m_activeItem->parentItem()));
+        m_activeItem = nullptr;
+    }
     QGraphicsScene::keyPressEvent(event);
 }
 
 void GraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     if(drawing)
-    {
-        SceneItem* it;
-        if(type == SceneItem::INPUT || type == SceneItem::OUTPUT)
-            it = new Label(type, event->scenePos().x(), event->scenePos().y(), GraphicsScene::centralItem());
-        else
-            it = new Operator(type, event->scenePos().x(),event->scenePos().y(), GraphicsScene::centralItem());
-        // addIten(it);
         emit itemCreated(type, event->scenePos());
-    }
-    else if(erasing)
-    {
-        QGraphicsItem* it = itemAt(event->scenePos(), QTransform());
-        if(it) {
-            emit itemErased(static_cast<SceneItem *>(it));
-            delete it->parentItem();
-        }
-    }
     else
-    {
-        if (itemAt(event->scenePos(), QTransform()))
-            qDebug() << "Something under mouse";
-
-        QGraphicsScene::mousePressEvent((event));
-    }
+        m_activeItem = itemAt(event->scenePos(), QTransform());
+    QGraphicsScene::mousePressEvent((event));
 }
 
 void GraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
-    qDebug() << "Released";
+    // if (m_activeItem)
+        // emit itemMoved(static_cast<SceneItem *>(m_activeItem->parentItem()), event->scenePos());
     QGraphicsScene::mouseReleaseEvent(event);
 }
