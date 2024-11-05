@@ -27,6 +27,30 @@ MainWindow* MainWindow::instance()
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
+    , m_actAutoSave("Auto Save", this)
+    , m_actShowAxes("Show Axes", this)
+    , m_actMouse(QAction(QIcon(":/Tools/src/Mouse.png"), "Mouse", this))
+    , m_actSave(QAction(QIcon(":/Tools/src/Save.png"), "Save", this))
+    , m_actSaveAs(QAction(QIcon(":/Tools/src/SaveAs.png"), "Save As", this))
+    , m_actNewFile(QAction(QIcon(":/Tools/src/NewFile.png"), "New File", this))
+    , m_actOpenFile(QIcon(":/Tools/src/OpenFile.png"), "Open File", this)
+    , m_actEraseAll(QAction(QIcon(":/Tools/src/EraseAll.png"), "Erase All", this))
+    , m_actZoomIn(QAction(QIcon(":/Tools/src/ZoomIn.png"), "Zoom In", this))
+    , m_actZoomOut(QAction(QIcon(":/Tools/src/ZoomOut.png"), "Zoom Out", this))
+    , m_actZoomReset(QAction(QIcon(":/Tools/src/ZoomReset.png"), "Zoom Reset", this))
+    , m_actCompile("Convert to Verilog", this)
+    , m_actCheck(QIcon(":/Tools/src/Check.png"), "Check Scheme", this)
+    , m_actResetSettings("Reset Settings", this)
+    , m_actAbout("About", this)
+    , m_actElem_NOT(QAction(QIcon(":/Operators/src/NOT.png"), "Mouse (ESC)", this))
+    , m_actElem_AND(QAction(QIcon(":/Operators/src/AND.png"), "Mouse (ESC)", this))
+    , m_actElem_OR(QAction(QIcon(":/Operators/src/OR.png"), "Mouse (ESC)", this))
+    , m_actElem_XOR(QAction(QIcon(":/Operators/src/XOR.png"), "Mouse (ESC)", this))
+    , m_actElem_NAND(QAction(QIcon(":/Operators/src/NAND.png"), "Mouse (ESC)", this))
+    , m_actElem_NOR(QAction(QIcon(":/Operators/src/NOR.png"), "Mouse (ESC)", this))
+    , m_actElem_XNOR(QAction(QIcon(":/Operators/src/XNOR.png"), "Mouse (ESC)", this))
+    , m_actElem_IN(QAction(QIcon(":/Labels/src/IN.png"), "Mouse (ESC)", this))
+    , m_actElem_OUT(QAction(QIcon(":/Labels/src/OUT.png"), "Mouse (ESC)", this))
 {
     resize(860,640);
     setWindowTitle("");
@@ -258,9 +282,9 @@ void MainWindow::resetSettings()
 {
     zoom(0);
     showAxes = true;
-    showAxesAction->setChecked(true);
+    m_actShowAxes.setChecked(true);
     autoSave = false;
-    autoSaveAction->setChecked(false);
+    m_actShowAxes.setChecked(false);
 
     wireColor = Qt::black;
     QPen pen(QBrush(wireColor), 2);
@@ -471,104 +495,86 @@ void MainWindow::setToolBar()
     m_toolbar_operators = addToolBar(tr("Operators"));
     m_toolbar_tools = addToolBar(tr("Tools"));
 
-    QAction* actionMouse = m_toolbar_tools->addAction(QIcon(":/Tools/src/Mouse.png"), "Mouse (ESC)");
-    connect(actionMouse, SIGNAL(triggered()), this, SLOT(stopDrawingObject()));
+    connect(&m_actMouse, SIGNAL(triggered()), this, SLOT(stopDrawingObject()));
+    connect(&m_actEraseAll, SIGNAL(triggered()), this, SLOT(eraseAll()));
+    m_toolbar_tools->addAction(&m_actMouse);
     m_toolbar_tools->addSeparator();
-
     m_toolbar_tools->addAction(m_Scene->getUndoAction());
     m_toolbar_tools->addAction(m_Scene->getRedoAction());
-
-    QAction* actionEraseAll = m_toolbar_tools->addAction(QIcon(":/Tools/src/EraseAll.png"), "Erase Everything");
-    connect(actionEraseAll, SIGNAL(triggered()), this, SLOT (eraseAll()));
     m_toolbar_tools->addSeparator();
+    m_toolbar_tools->addAction(&m_actSave);
+    m_toolbar_tools->addAction(&m_actCheck);
+    m_toolbar_tools->addAction(&m_actEraseAll);
+    m_toolbar_tools->addSeparator();
+    m_toolbar_tools->addActions({&m_actZoomIn, &m_actZoomOut, &m_actZoomReset});
 
     // APPROACH 1
     // mapping signal to slot with non-void arguments
     QSignalMapper* signalMapper = new QSignalMapper(this);
-
-    QAction* actionZoomIn = m_toolbar_tools->addAction(QIcon(":/Tools/src/ZoomIn.png"), "Zoom In");
-    QAction* actionZoomOut = m_toolbar_tools->addAction(QIcon(":/Tools/src/ZoomOut.png"), "Zoom Out");
-    QAction* actionZoomReset = m_toolbar_tools->addAction(QIcon(":/Tools/src/ZoomReset.png"), "Reset Zoom");
-
-    connect(actionZoomIn, SIGNAL(triggered()), signalMapper, SLOT (map()));
-    connect(actionZoomOut, SIGNAL(triggered()), signalMapper, SLOT (map()));
-    connect(actionZoomReset, SIGNAL(triggered()), signalMapper, SLOT (map()));
-
-    signalMapper->setMapping(actionZoomReset, 0);
-    signalMapper->setMapping(actionZoomIn, 1);
-    signalMapper->setMapping(actionZoomOut, -1);
-
+    connect(&m_actZoomIn, SIGNAL(triggered()), signalMapper, SLOT (map()));
+    connect(&m_actZoomOut, SIGNAL(triggered()), signalMapper, SLOT (map()));
+    connect(&m_actZoomReset, SIGNAL(triggered()), signalMapper, SLOT (map()));
+    signalMapper->setMapping(&m_actZoomReset, 0);
+    signalMapper->setMapping(&m_actZoomIn, 1);
+    signalMapper->setMapping(&m_actZoomOut, -1);
     connect(signalMapper, &QSignalMapper::mappedInt, this, &MainWindow::zoom);
     // APPROACH 2
     // mapping signal to slot with non-void arguments
-    QAction* item_not = m_toolbar_operators->addAction(QIcon(":/Operators/src/NOT.png"), "NOT");
-    QAction* item_and = m_toolbar_operators->addAction(QIcon(":/Operators/src/AND.png"), "AND");
-    QAction* item_or = m_toolbar_operators->addAction(QIcon(":/Operators/src/OR.png"),  "OR");
-    QAction* item_xor = m_toolbar_operators->addAction(QIcon(":/Operators/src/XOR.png"), "XOR");
-    QAction* item_nand = m_toolbar_operators->addAction(QIcon(":/Operators/src/NAND.png"), "NAND");
-    QAction* item_nor = m_toolbar_operators->addAction(QIcon(":/Operators/src/NOR.png"),  "NOR");
-    QAction* item_xnor = m_toolbar_operators->addAction(QIcon(":/Operators/src/XNOR.png"), "XNOR");
-    m_toolbar_operators->addSeparator();
-    QAction* item_in = m_toolbar_operators->addAction(QIcon(":/Labels/src/IN.png"), "IN");
-    QAction* item_out = m_toolbar_operators->addAction(QIcon(":/Labels/src/OUT.png"), "OUT");
-
-    connect(item_not, &QAction::triggered, this, [this] { setDrawingObject(SceneItem::TYPE::NOT); });
-    connect(item_and, &QAction::triggered, this, [this] { setDrawingObject(SceneItem::TYPE::AND); });
-    connect(item_or, &QAction::triggered, this, [this] { setDrawingObject(SceneItem::TYPE::OR); });
-    connect(item_xor, &QAction::triggered, this, [this] { setDrawingObject(SceneItem::TYPE::XOR); });
-    connect(item_nand, &QAction::triggered, this, [this] { setDrawingObject(SceneItem::TYPE::NAND); });
-    connect(item_nor, &QAction::triggered, this, [this] { setDrawingObject(SceneItem::TYPE::NOR); });
-    connect(item_xnor, &QAction::triggered, this, [this] { setDrawingObject(SceneItem::TYPE::XNOR); });
-    connect(item_in, &QAction::triggered, this, [this] { setDrawingObject(SceneItem::TYPE::INPUT); });
-    connect(item_out, &QAction::triggered, this, [this] { setDrawingObject(SceneItem::TYPE::OUTPUT); });
+    m_toolbar_operators->addActions({&m_actElem_NOT, &m_actElem_AND, &m_actElem_OR,
+                                     &m_actElem_XOR, &m_actElem_NAND, &m_actElem_NOR,
+                                     &m_actElem_XNOR, &m_actElem_IN, &m_actElem_OUT});
+    connect(&m_actElem_NOT, &QAction::triggered, this, [this] { setDrawingObject(SceneItem::TYPE::NOT); });
+    connect(&m_actElem_AND, &QAction::triggered, this, [this] { setDrawingObject(SceneItem::TYPE::AND); });
+    connect(&m_actElem_OR, &QAction::triggered, this, [this] { setDrawingObject(SceneItem::TYPE::OR); });
+    connect(&m_actElem_XOR, &QAction::triggered, this, [this] { setDrawingObject(SceneItem::TYPE::XOR); });
+    connect(&m_actElem_NAND, &QAction::triggered, this, [this] { setDrawingObject(SceneItem::TYPE::NAND); });
+    connect(&m_actElem_NOR, &QAction::triggered, this, [this] { setDrawingObject(SceneItem::TYPE::NOR); });
+    connect(&m_actElem_XNOR, &QAction::triggered, this, [this] { setDrawingObject(SceneItem::TYPE::XNOR); });
+    connect(&m_actElem_IN, &QAction::triggered, this, [this] { setDrawingObject(SceneItem::TYPE::INPUT); });
+    connect(&m_actElem_OUT, &QAction::triggered, this, [this] { setDrawingObject(SceneItem::TYPE::OUTPUT); });
 }
 
 void MainWindow::setMenuBar()
 {
     QMenu* fileMenu = menuBar()->addMenu(tr("&File"));
-    QAction* newAction = fileMenu->addAction("New");
-    connect(newAction, SIGNAL(triggered()), this, SLOT(newDocument()));
-
-    QAction* openAction = fileMenu->addAction("Open");
-    connect(openAction, SIGNAL(triggered()), this, SLOT(load()));
-
-    fileMenu->addSeparator();
-
-    QAction* saveAction = fileMenu->addAction("Save");
-    connect(saveAction, SIGNAL(triggered()), this, SLOT(save()));
-
     QMenu* itemMenu = menuBar()->addMenu(tr("&Project"));
+    QMenu* settingsMenu = menuBar()->addMenu(tr("&Settings"));
+    QMenu* prefereneMenu = settingsMenu->addMenu("&Preferences");
+    QMenu* aboutMenu = menuBar()->addMenu(tr("&Help"));
+
+    fileMenu->addAction(&m_actNewFile);
+    fileMenu->addAction(&m_actOpenFile);
+    fileMenu->addSeparator();
+    fileMenu->addAction(&m_actSave);
+    fileMenu->addAction(&m_actSaveAs);
+    connect(&m_actNewFile, SIGNAL(triggered()), this, SLOT(newDocument()));
+    connect(&m_actOpenFile, SIGNAL(triggered()), this, SLOT(load()));
+    connect(&m_actSave, SIGNAL(triggered()), this, SLOT(save()));
 
     itemMenu->addAction(m_Scene->getUndoAction());
     itemMenu->addAction(m_Scene->getRedoAction());
     itemMenu->addSeparator();
+    itemMenu->addAction(&m_actCompile);
+    itemMenu->addAction(&m_actCheck);
+    connect(&m_actCompile, SIGNAL(triggered()), this, SLOT(compile()));
+    connect(&m_actCheck, SIGNAL(triggered()), this, SLOT(check()));
 
-    QAction* compileAction = itemMenu->addAction("Convert to Verilog");
-    connect(compileAction, SIGNAL(triggered()), this, SLOT(compile()));
+    prefereneMenu->addAction(&m_actAutoSave);
+    prefereneMenu->addAction(&m_actShowAxes);
+    m_actAutoSave.setCheckable(true);
+    m_actAutoSave.setChecked(autoSave);
+    m_actShowAxes.setCheckable(true);
+    m_actShowAxes.setChecked(showAxes);
+    connect(&m_actShowAxes, SIGNAL(triggered()), this, SLOT(setShowAxes()));
+    connect(&m_actAutoSave, SIGNAL(triggered()), this, SLOT(setAutoSave()));
 
-    QAction* checkAction = itemMenu->addAction("Check");
-    connect(checkAction, SIGNAL(triggered()), this, SLOT(check()));
-    QMenu* settingsMenu = menuBar()->addMenu(tr("&Settings"));
-    QMenu* prefereneMenu = settingsMenu->addMenu("&Preferences");
-    autoSaveAction = prefereneMenu->addAction("Auto Save");
-    autoSaveAction->setCheckable(true);
-    autoSaveAction->setChecked(autoSave);
-    connect(autoSaveAction, SIGNAL(triggered()), this, SLOT(setAutoSave()));
+    settingsMenu->addAction(&m_actZoomReset);
+    settingsMenu->addAction(&m_actResetSettings);
+    connect(&m_actZoomReset, SIGNAL(triggered()), this, SLOT(zoom()));
+    connect(&m_actResetSettings, SIGNAL(triggered()), this, SLOT(resetSettings()));
 
-    showAxesAction = prefereneMenu->addAction("Show Axes");
-    showAxesAction->setCheckable(true);
-    showAxesAction->setChecked(showAxes);
-    connect(showAxesAction, SIGNAL(triggered()), this, SLOT(setShowAxes()));
-
-    QAction* zoomReset = settingsMenu->addAction("Reset Zoom Settings");
-    connect(zoomReset, SIGNAL(triggered()), this, SLOT(zoom()));
-
-    QAction* resetSettingsAction = settingsMenu->addAction("Reset Settings");
-    connect(resetSettingsAction, SIGNAL(triggered()), this, SLOT(resetSettings()));
-
-    QMenu* aboutMenu = menuBar()->addMenu(tr("&Help"));
-    QAction* aboutAction = aboutMenu->addAction("About");
-    connect(aboutAction, SIGNAL(triggered()), this, SLOT(about()));
+    aboutMenu->addAction(&m_actAbout);
+    connect(&m_actAbout, SIGNAL(triggered()), this, SLOT(about()));
 }
 
 #else

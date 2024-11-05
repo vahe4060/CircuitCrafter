@@ -72,17 +72,42 @@ protected:
     QToolBar* m_toolbar_operators = nullptr;
     QToolBar* m_toolbar_tools = nullptr;
 
-    QAction* autoSaveAction = nullptr;
-    QAction* showAxesAction = nullptr;
-
     QString currentPath = "";
     bool updated = false;
 
     virtual void closeEvent(QCloseEvent* event) override;
     MainWindow(QWidget *parent = nullptr);
+    void createActions();
     void setToolBar();
     void setMenuBar();
     void loadSettings();
+
+private:
+    QAction m_actAutoSave;
+    QAction m_actShowAxes;
+    QAction m_actMouse;
+    QAction m_actSave;
+    QAction m_actSaveAs;
+    QAction m_actNewFile;
+    QAction m_actOpenFile;
+    QAction m_actEraseAll;
+    QAction m_actZoomIn;
+    QAction m_actZoomOut;
+    QAction m_actZoomReset;
+    QAction m_actCompile;
+    QAction m_actCheck;
+    QAction m_actResetSettings;
+    QAction m_actAbout;
+
+    QAction m_actElem_NOT;
+    QAction m_actElem_AND;
+    QAction m_actElem_OR;
+    QAction m_actElem_XOR;
+    QAction m_actElem_NAND;
+    QAction m_actElem_NOR;
+    QAction m_actElem_XNOR;
+    QAction m_actElem_IN;
+    QAction m_actElem_OUT;
 };
 
 #else

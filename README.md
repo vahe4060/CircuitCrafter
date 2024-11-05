@@ -18,7 +18,7 @@ Simply open the project in Qt Creator and build with QMake.
 6. Add RMBC menu on SceneItem (delete, check)
 7. Keep toolbar positions in settings 
 8. Add tooltip for SceneItem
-9. Add "save", "save as", "close" button/file menu options
+9. Add "save", "save as", "close" button/file menu options ✅ 
 10. Implement SceneItem naming
 11. Implement drawing of dynamic number of edges
 12. Implement white/black background themes

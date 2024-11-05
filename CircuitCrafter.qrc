@@ -14,9 +14,13 @@
         <file>src/ZoomOut.png</file>
         <file>src/Redo.png</file>
         <file>src/Undo.png</file>
+        <file>src/NewFile.png</file>
+        <file>src/OpenFile.png</file>
+        <file>src/Check.png</file>
         <file>src/ZoomReset.png</file>
-        <file>src/Eraser.png</file>
         <file>src/EraseAll.png</file>
+        <file>src/Save.png</file>
+        <file>src/SaveAs.png</file>
     </qresource>
     <qresource prefix="/Labels">
         <file>src/IN.png</file>
