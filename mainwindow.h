@@ -15,6 +15,7 @@
 #include "verilog_parser.h"
 #include "experimental.h"
 #include "commands.h"
+#include "graphicsview.h"
 // #include <QPointF>
 
 QT_BEGIN_NAMESPACE

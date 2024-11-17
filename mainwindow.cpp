@@ -58,7 +58,7 @@ MainWindow::MainWindow(QWidget *parent)
     QVBoxLayout* layout = new QVBoxLayout;
 
     m_Scene = new GraphicsScene(QRectF(-2500, -2500, 5000, 5000), this);
-    m_View = new QGraphicsView(m_Scene);
+    m_View = new GraphicsView(m_Scene);
 
     layout->addWidget(m_View);
     widget->setLayout(layout);
@@ -204,18 +204,12 @@ void MainWindow::newDocument()
         auto reply = popUpDialog("Editor", "Save current file?",
                                  QMessageBox::Question,
                                  QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
-
         if (reply == QMessageBox::Yes)
-        {
            save();
-        }
         else if(reply == QMessageBox::Cancel)
-        {
            return;
-        }
     }
     m_Scene->clear();
-
     currentPath = "";
     setNotUpdatedFlag();
 }
@@ -283,6 +277,8 @@ void MainWindow::resetSettings()
     zoom(0);
     showAxes = true;
     m_actShowAxes.setChecked(true);
+    loadAxes();
+
     autoSave = false;
     m_actShowAxes.setChecked(false);
 
@@ -317,7 +313,7 @@ void MainWindow::zoom(int zoomin)
     if(zoomin > 0)
         m_View->scale(1.1, 1.1);
     else if(zoomin < 0)
-        m_View->scale(0.909, 0.909);
+        m_View->scale(0.90909, 0.90909);
     else
         m_View->resetTransform();
 }

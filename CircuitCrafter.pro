@@ -17,6 +17,7 @@ SOURCES += \
     graphicspixmapitem.cpp \
     graphicsscene.cpp \
     graphicssceneitem.cpp \
+    graphicsview.cpp \
     input_node.cpp \
     labels.cpp \
     main.cpp \
@@ -36,6 +37,7 @@ HEADERS += \
     graphicspixmapitem.h \
     graphicsscene.h \
     graphicssceneitem.h \
+    graphicsview.h \
     input_node.h \
     labels.h \
     mainwindow.h \

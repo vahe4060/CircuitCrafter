@@ -38,6 +38,7 @@ protected:
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
     virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
 
+    QPointF m_origin;
     bool drawing = false;
     bool erasing = false;
     SceneItem::TYPE type;
