@@ -18,7 +18,7 @@ public:
     Node* left() const { return m_left; }
     Node* right() const { return m_right; }
     void adjust();
-    void highlight(QPen& pen);
+    void highlight(const QPen& pen);
 
     virtual int type() const override { return TYPE::EDGE; }
 

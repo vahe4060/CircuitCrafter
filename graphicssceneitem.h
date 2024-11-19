@@ -32,7 +32,7 @@ public:
     void setSelected(bool state);
     // virtual void disable(); // TODO
     // virtual void enable(); // TODO
-    virtual void highlight(QPen& pen);
+    virtual void highlight(const QPen& pen = QPen(QBrush(Qt::green), 3));
     virtual void setPos(QPointF pos);
     virtual int type() const override { return m_t; }
     virtual int id() const { return m_id; }

@@ -46,7 +46,7 @@ Edge::~Edge()
 }
 
 
-void Edge::highlight(QPen &pen)
+void Edge::highlight(const QPen &pen)
 {
     for(QGraphicsItem* i: childItems())
     {
@@ -57,7 +57,7 @@ void Edge::highlight(QPen &pen)
 
 void Edge::adjust()
 {
-    int x1 = m_left->x() +  m_left->r();
+    int x1 = m_left->x() + m_left->r();
     int y1 = m_left->y() + m_left->r();
     int x2 = m_right->x() + m_right->r();
     int y2 = m_right->y() + m_right->r();

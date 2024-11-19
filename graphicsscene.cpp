@@ -73,17 +73,11 @@ void GraphicsScene::setCurrent(SceneItem::TYPE t)
 {
     type = t;
     setDrawing(true);
-    setErasing(false);
 }
 
 void GraphicsScene::setDrawing(bool d)
 {
     drawing = d;
-}
-
-void GraphicsScene::setErasing(bool e)
-{
-    erasing = e;
 }
 
 void GraphicsScene::clear()
@@ -105,7 +99,6 @@ void GraphicsScene::keyPressEvent(QKeyEvent* event)
     if(event->key() ==  Qt::Key_Escape)
     {
         setDrawing(false);
-        setErasing(false);
         MainWindow::instance()->View()->setCursor(QCursor());
     }
     if(event->key() == Qt::Key_Delete && m_activeItem)

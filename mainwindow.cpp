@@ -304,7 +304,6 @@ void MainWindow::setDrawingObject(SceneItem::TYPE t)
 void MainWindow::stopDrawingObject()
 {
     m_Scene->setDrawing(false);
-    m_Scene->setErasing(false);
     m_View->setCursor(QCursor());
 }
 
@@ -316,13 +315,6 @@ void MainWindow::zoom(int zoomin)
         m_View->scale(0.90909, 0.90909);
     else
         m_View->resetTransform();
-}
-
-void MainWindow::eraser()
-{
-    m_View->setCursor(QCursor(Qt::CursorShape::PointingHandCursor));
-    m_Scene->setErasing(true);
-    m_Scene->setDrawing(false);
 }
 
 void MainWindow::eraseAll()

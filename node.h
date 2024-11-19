@@ -23,7 +23,7 @@ public:
 
     QList<Node*> nodes() const;
 
-    void highlight(QPen& pen);
+    void highlight(const QPen& pen);
     virtual void adjust();
     virtual int type() const = 0; //override { return Type; }
     virtual void addEdge(Node* e) = 0;

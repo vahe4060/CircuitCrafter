@@ -76,7 +76,7 @@ QVector<SceneItem*> SceneItem::outputs() const
 }
 
 
-void SceneItem::highlight(QPen &pen)
+void SceneItem::highlight(const QPen &pen)
 {
     for(Node* i : m_inputs)
     {

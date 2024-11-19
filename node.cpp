@@ -19,7 +19,7 @@ void Node::adjust()
         it.value()->adjust();
 }
 
-void Node::highlight(QPen& pen)
+void Node::highlight(const QPen& pen)
 {
     for(auto*i: m_edges)
     {

@@ -33,7 +33,6 @@ public slots:
     void zoom(int zoomin = 0);
     void save();
     void load();
-    void eraser();
     void eraseAll();
     void loadAxes();
     void resetSettings();

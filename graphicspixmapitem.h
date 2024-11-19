@@ -7,8 +7,6 @@ class GraphicsPixmapItem: public QGraphicsPixmapItem
 {
 public:
     explicit GraphicsPixmapItem(const QPixmap &pixmap, QGraphicsItem *parent = nullptr);
-
-
 protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
     void mousePressEvent(QGraphicsSceneMouseEvent *event) override;

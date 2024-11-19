@@ -40,7 +40,6 @@ protected:
 
     QPointF m_origin;
     bool drawing = false;
-    bool erasing = false;
     SceneItem::TYPE type;
     QGraphicsItem* m_AxisX = nullptr;
     QGraphicsItem* m_AxisY = nullptr;
