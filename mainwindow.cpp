@@ -27,6 +27,7 @@ MainWindow* MainWindow::instance()
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
+    , m_isThemeDark(true)
     , m_actAutoSave("Auto Save", this)
     , m_actShowAxes("Show Axes", this)
     , m_actMouse(QAction(QIcon(":/Tools/src/Mouse.png"), "Mouse", this))
@@ -40,6 +41,7 @@ MainWindow::MainWindow(QWidget *parent)
     , m_actZoomReset(QAction(QIcon(":/Tools/src/ZoomReset.png"), "Zoom Reset", this))
     , m_actCompile("Convert to Verilog", this)
     , m_actCheck(QIcon(":/Tools/src/Check.png"), "Check Scheme", this)
+    , m_actChangeTheme(QAction(QIcon(":/Tools/src/darkTheme.png"), "Dark Theme", this))
     , m_actResetSettings("Reset Settings", this)
     , m_actAbout("About", this)
     , m_actElem_NOT(QAction(QIcon(":/Operators/src/NOT.png"), "Mouse (ESC)", this))
@@ -59,6 +61,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     m_Scene = new GraphicsScene(QRectF(-2500, -2500, 5000, 5000), this);
     m_View = new GraphicsView(m_Scene);
+    m_View->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_View->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_actChangeTheme.setCheckable(true);
 
     layout->addWidget(m_View);
     widget->setLayout(layout);
@@ -69,8 +74,62 @@ MainWindow::MainWindow(QWidget *parent)
     setMenuBar();
     loadAxes();
     setNotUpdatedFlag();
+    setTheme();
 }
 
+void MainWindow::setTheme()
+{
+    if (!m_isThemeDark) {
+        setStyleSheet(
+            "QMenu {"
+            "    background-color: #fcfcfc;"
+            "    color: #2a2a2a;"
+            "    border: 0.5px solid black;"
+            "}"
+            "QMenu::item:selected {"
+            "    background-color: #e95420;"
+            "    color: white;"
+            "}"
+            "QMainWindow, QWidget, QMenuBar, QPushButton, QLineEdit, QLabel, QComboBox, QSpinBox {"
+            "    background-color: #fcfcfc;"
+            "    color: #2a2a2a;"
+            "}"
+            "QMessageBox {"
+            "   border: 1px solid black;"
+            "   border-radius: 5px;"
+            "   padding: 5px;"
+            "}"
+            );
+        m_actChangeTheme.setText("Light Theme");
+        m_actChangeTheme.setChecked(false);
+    }
+    else {
+        setStyleSheet(
+            "QMenu {"
+            "    background-color: #2a2a2a;"
+            "    color: #fcfcfc;"
+            "    border: 0.5px solid black;"
+            "}"
+            "QMenu::item:selected {"
+            "    background-color: #e95420;"
+            "    color: white;"
+            "}"
+            "QMainWindow, QWidget, QMenuBar, QPushButton, QLineEdit, QLabel, QComboBox, QSpinBox {"
+            "    background-color: #2a2a2a;"
+            "    color: #fcfcfc;"
+            "}"
+            "QMessageBox {"
+            "    border: 1px solid black;"
+            "    border-radius: 5px;"
+            "    padding: 5px;"
+            "}"
+            );
+        m_actChangeTheme.setText("Dark Theme");
+        m_actChangeTheme.setChecked(true);
+    }
+    setAutoFillBackground(true);
+    m_isThemeDark = !m_isThemeDark;
+}
 
 MainWindow::~MainWindow()
 {
@@ -495,7 +554,9 @@ void MainWindow::setToolBar()
     m_toolbar_tools->addAction(&m_actEraseAll);
     m_toolbar_tools->addSeparator();
     m_toolbar_tools->addActions({&m_actZoomIn, &m_actZoomOut, &m_actZoomReset});
-
+    m_toolbar_tools->addSeparator();
+    m_toolbar_tools->addAction(&m_actChangeTheme);
+    connect(&m_actChangeTheme, SIGNAL(triggered()), this, SLOT(setTheme()));
     // APPROACH 1
     // mapping signal to slot with non-void arguments
     QSignalMapper* signalMapper = new QSignalMapper(this);

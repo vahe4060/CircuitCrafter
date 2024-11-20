@@ -44,6 +44,7 @@ public slots:
     void about();
     void compile();
     bool check();
+    void setTheme();
 
 public:
     static MainWindow* instance();
@@ -81,8 +82,8 @@ protected:
     void setToolBar();
     void setMenuBar();
     void loadSettings();
-
 private:
+    bool m_isThemeDark;
     QAction m_actAutoSave;
     QAction m_actShowAxes;
     QAction m_actMouse;
@@ -96,6 +97,7 @@ private:
     QAction m_actZoomReset;
     QAction m_actCompile;
     QAction m_actCheck;
+    QAction m_actChangeTheme;
     QAction m_actResetSettings;
     QAction m_actAbout;
 

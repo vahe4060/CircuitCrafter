@@ -21,6 +21,8 @@
         <file>src/EraseAll.png</file>
         <file>src/Save.png</file>
         <file>src/SaveAs.png</file>
+        <file>src/lightTheme.png</file>
+        <file>src/darkTheme.png</file>
     </qresource>
     <qresource prefix="/Labels">
         <file>src/IN.png</file>
